@@ -6,15 +6,15 @@ function App() {
     const connectToDevice = async () => {
         try {
             const device = await navigator.bluetooth.requestDevice({
-                filters: [{ services: ['a8a1eba9-c5e2-4282-99d0-9ff851b5f7f4'] }],
+                filters: [{ services: ['439477e7-6fce-4432-82dd-8a1f2691eb2d'] }],
             });
             
             console.log("line 12");
             const server = await device.gatt.connect();
             console.log("line 14");
-            const service = await server.getPrimaryService('a8a1eba9-c5e2-4282-99d0-9ff851b5f7f4');
+            const service = await server.getPrimaryService('439477e7-6fce-4432-82dd-8a1f2691eb2d');
             console.log("line 16");
-            const characteristic = await service.getCharacteristic('a8a1eba9-c5e2-4282-99d0-9ff851b5f7f4');
+            const characteristic = await service.getCharacteristic('439477e7-6fce-4432-82dd-8a1f2691eb2d');
             console.log("line 18");
 
             setDevice({
