@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 function App() {
   const [bleCharacteristic, setBleCharacteristic] = useState(null);
@@ -14,6 +14,7 @@ function App() {
       const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
 
       setBleCharacteristic(characteristic);
+      sendCommand('C'); // Notify Arduino that the connection is established
     } catch (error) {
       console.error('Bluetooth error:', error);
     }
@@ -26,21 +27,24 @@ function App() {
     }
   };
 
-  const handleNeopixelAnimation = async () => {
+  const handleConnect = async () => {
     await connectArduino();
-    await sendCommand('A'); // Send command to turn on Neopixel animation
   };
 
   const handleLcdMessage = async () => {
-    await connectArduino();
-    await sendCommand('B'); // Send command to display message on LCD
+    await sendCommand('M'); // Send command to display message on LCD
+  };
+
+  const handleNeopixelControl = async () => {
+    await sendCommand('N'); // Send command to control Neopixel lights
   };
 
   return (
     <div>
       <h1>Bluetooth Control App</h1>
-      <button onClick={handleNeopixelAnimation}>Start Neopixel Animation</button>
+      <button onClick={handleConnect}>Connect to HM-10</button>
       <button onClick={handleLcdMessage}>Display Message on LCD</button>
+      <button onClick={handleNeopixelControl}>Control Neopixel Lights</button>
     </div>
   );
 }
