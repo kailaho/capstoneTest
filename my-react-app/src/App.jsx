@@ -1,50 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function App() {
-  const [bleCharacteristic, setBleCharacteristic] = useState(null);
+  const [bleDevice, setBleDevice] = useState(null);
+  const [lightsOn, setLightsOn] = useState(false);
+  const [message, setMessage] = useState('');
+  const [lcdMessage, setLcdMessage] = useState('');
 
-  const connectArduino = async () => {
-    try {
-      const device = await navigator.bluetooth.requestDevice({
-        filters: [{ services: ['0000ffe0-0000-1000-8000-00805f9b34fb'] }],
+  useEffect(() => {
+    if ('bluetooth' in navigator) {
+      navigator.bluetooth.requestDevice({
+        filters: [{ services: ['uuid'] }]
+      })
+      .then(device => {
+        setBleDevice(device);
+      })
+      .catch(error => {
+        console.error('Bluetooth error:', error);
       });
+    } else {
+      console.error('Web Bluetooth API is not supported in this browser.');
+    }
+  }, []);
 
-      const server = await device.gatt.connect();
-      const service = await server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
-      const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
+  const connectToDevice = async () => {
+    try {
+      const server = await bleDevice.gatt.connect();
+      const service = await server.getPrimaryService('<Your BLE Service UUID>');
+      const characteristic = await service.getCharacteristic('<Your BLE Characteristic UUID>');
 
-      setBleCharacteristic(characteristic);
-      sendCommand('C'); // Notify Arduino that the connection is established
+      // Write '1' to turn on lights
+      await characteristic.writeValue(new TextEncoder().encode('1'));
+      setLightsOn(true);
     } catch (error) {
-      console.error('Bluetooth error:', error);
+      console.error('Error connecting to device:', error);
     }
   };
 
-  const sendCommand = async (command) => {
-    if (bleCharacteristic) {
-      const encoder = new TextEncoder('utf-8');
-      await bleCharacteristic.writeValue(encoder.encode(command));
+  const sendLCDMessage = async () => {
+    try {
+      const server = await bleDevice.gatt.connect();
+      const service = await server.getPrimaryService('<Your BLE Service UUID>');
+      const characteristic = await service.getCharacteristic('<Your BLE Characteristic UUID>');
+
+      // Write message to display on LCD
+      await characteristic.writeValue(new TextEncoder().encode(message));
+      setLcdMessage(message);
+    } catch (error) {
+      console.error('Error sending LCD message:', error);
     }
-  };
-
-  const handleConnect = async () => {
-    await connectArduino();
-  };
-
-  const handleLcdMessage = async () => {
-    await sendCommand('M'); // Send command to display message on LCD
-  };
-
-  const handleNeopixelControl = async () => {
-    await sendCommand('N'); // Send command to control Neopixel lights
   };
 
   return (
     <div>
-      <h1>Bluetooth Control App</h1>
-      <button onClick={handleConnect}>Connect to HM-10</button>
-      <button onClick={handleLcdMessage}>Display Message on LCD</button>
-      <button onClick={handleNeopixelControl}>Control Neopixel Lights</button>
+      <button onClick={connectToDevice}>Connect to Device</button>
+      <button onClick={sendLCDMessage}>Send LCD Message</button>
+      <input
+        type="text"
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+      />
+      <p>LCD Message: {lcdMessage}</p>
     </div>
   );
 }
