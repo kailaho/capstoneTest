@@ -9,7 +9,7 @@ function App() {
   useEffect(() => {
     if ('bluetooth' in navigator) {
       navigator.bluetooth.requestDevice({
-        filters: [{ services: ['uuid'] }]
+        filters: [{ services: ['0000FFE0-0000-1000-8000-00805F9B34FB'] }]
       })
       .then(device => {
         setBleDevice(device);
@@ -25,8 +25,8 @@ function App() {
   const connectToDevice = async () => {
     try {
       const server = await bleDevice.gatt.connect();
-      const service = await server.getPrimaryService('<Your BLE Service UUID>');
-      const characteristic = await service.getCharacteristic('<Your BLE Characteristic UUID>');
+      const service = await server.getPrimaryService('0000FFE0-0000-1000-8000-00805F9B34FB');
+      const characteristic = await service.getCharacteristic('0000FFE1-0000-1000-8000-00805F9B34FB');
 
       // Write '1' to turn on lights
       await characteristic.writeValue(new TextEncoder().encode('1'));
@@ -39,8 +39,8 @@ function App() {
   const sendLCDMessage = async () => {
     try {
       const server = await bleDevice.gatt.connect();
-      const service = await server.getPrimaryService('<Your BLE Service UUID>');
-      const characteristic = await service.getCharacteristic('<Your BLE Characteristic UUID>');
+      const service = await server.getPrimaryService('0000FFE0-0000-1000-8000-00805F9B34FB');
+      const characteristic = await service.getCharacteristic('<0000FFE1-0000-1000-8000-00805F9B34FB');
 
       // Write message to display on LCD
       await characteristic.writeValue(new TextEncoder().encode(message));
