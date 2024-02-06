@@ -47,6 +47,7 @@ function App() {
 
   return (
     <div>
+      <h1>Bluetooth Control App</h1>
       <button onClick={handleNeopixelAnimation}>Start Neopixel Animation</button>
       <button onClick={handleLcdMessage}>Display Message on LCD</button>
     </div>
