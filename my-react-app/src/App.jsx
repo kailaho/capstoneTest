@@ -1,45 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function App() {
-    const [device, setDevice] = useState(null);
+  const [bleCharacteristic, setBleCharacteristic] = useState(null);
 
-    const connectToDevice = async () => {
-        try {
-            const device = await navigator.bluetooth.requestDevice({
-                filters: [{ services: ['439477e7-6fce-4432-82dd-8a1f2691eb2d'] }],
-            });
-            
-            console.log("line 12");
-            const server = await device.gatt.connect();
-            console.log("line 14");
-            const service = await server.getPrimaryService('439477e7-6fce-4432-82dd-8a1f2691eb2d');
-            console.log("line 16");
-            const characteristic = await service.getCharacteristic('439477e7-6fce-4432-82dd-8a1f2691eb2d');
-            console.log("line 18");
+  useEffect(() => {
+    const connectArduino = async () => {
+      try {
+        const device = await navigator.bluetooth.requestDevice({
+          filters: [{ services: ['0000ffe0-0000-1000-8000-00805f9b34fb'] }],
+        });
 
-            setDevice({
-                device,
-                characteristic,
-            });
-        } catch (error) {
-            console.error('Error connecting to BLE device:', error);
-        }
+        const server = await device.gatt.connect();
+        const service = await server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
+        const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
+
+        setBleCharacteristic(characteristic);
+      } catch (error) {
+        console.error('Bluetooth error:', error);
+      }
     };
 
-    const sendCommand = async (command) => {
-        if (device && device.characteristic) {
-            await device.characteristic.writeValue(new TextEncoder().encode(command));
-        }
-    };
+    connectArduino();
 
-    return (
-        <div className="App">
-            <h1>BLE Control App</h1>
-            <button onClick={connectToDevice}>Connect to BLE Device</button>
-            <button onClick={() => sendCommand('1')}>LED On</button>
-            <button onClick={() => sendCommand('0')}>LED Off</button>
-        </div>
-    );
+    // Cleanup function (disconnect from Bluetooth on component unmount)
+    return () => {
+      if (bleCharacteristic) {
+        bleCharacteristic.service.device.gatt.disconnect();
+      }
+    };
+  }, []); // Empty dependency array to run the effect only once on component mount
+
+  const sendCommand = async (command) => {
+    if (bleCharacteristic) {
+      const encoder = new TextEncoder('utf-8');
+      await bleCharacteristic.writeValue(encoder.encode(command));
+    }
+  };
+
+  const handleNeopixelAnimation = async () => {
+    await sendCommand('A'); // Send command to turn on Neopixel animation
+  };
+
+  const handleLcdMessage = async () => {
+    await sendCommand('B'); // Send command to display message on LCD
+  };
+
+  return (
+    <div>
+      <button onClick={handleNeopixelAnimation}>Start Neopixel Animation</button>
+      <button onClick={handleLcdMessage}>Display Message on LCD</button>
+    </div>
+  );
 }
 
 export default App;
