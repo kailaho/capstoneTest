@@ -1,67 +1,61 @@
-import React, { useState, useEffect } from 'react';
+/*const service = await bleDevice.gatt.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
+        const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb' */
 
-function App() {
-  const [bleDevice, setBleDevice] = useState(null);
-  const [lightsOn, setLightsOn] = useState(false);
-  const [message, setMessage] = useState('');
-  const [lcdMessage, setLcdMessage] = useState('');
+        import React, { useState } from 'react';
 
-  useEffect(() => {
-    if ('bluetooth' in navigator) {
-      navigator.bluetooth.requestDevice({
-        filters: [{ services: ['0000FFE0-0000-1000-8000-00805F9B34FB'] }]
-      })
-      .then(device => {
-        setBleDevice(device);
-      })
-      .catch(error => {
-        console.error('Bluetooth error:', error);
-      });
-    } else {
-      console.error('Web Bluetooth API is not supported in this browser.');
-    }
-  }, []);
+        function App() {
+          const [connected, setConnected] = useState(false);
+          const [bleServer, setBleServer] = useState(null); // Changed state to store GATT server
+          const [error, setError] = useState(null);
+          const [message, setMessage] = useState('');
+        
+          const connectToDevice = async () => {
+            try {
+              const device = await navigator.bluetooth.requestDevice({
+                filters: [{ services: ['0000ffe0-0000-1000-8000-00805f9b34fb'] }],
+              });
+              const server = await device.gatt.connect();
+              setBleServer(server); // Store the GATT server instead of the device
+              setConnected(true);
+            } catch (err) {
+              setError(err.message);
+            }
+          };
 
-  const connectToDevice = async () => {
-    try {
-      const server = await bleDevice.gatt.connect();
-      const service = await server.getPrimaryService('0000FFE0-0000-1000-8000-00805F9B34FB');
-      const characteristic = await service.getCharacteristic('0000FFE1-0000-1000-8000-00805F9B34FB');
-
-      // Write '1' to turn on lights
-      await characteristic.writeValue(new TextEncoder().encode('1'));
-      setLightsOn(true);
-    } catch (error) {
-      console.error('Error connecting to device:', error);
-    }
-  };
-
-  const sendLCDMessage = async () => {
-    try {
-      const server = await bleDevice.gatt.connect();
-      const service = await server.getPrimaryService('0000FFE0-0000-1000-8000-00805F9B34FB');
-      const characteristic = await service.getCharacteristic('<0000FFE1-0000-1000-8000-00805F9B34FB');
-
-      // Write message to display on LCD
-      await characteristic.writeValue(new TextEncoder().encode(message));
-      setLcdMessage(message);
-    } catch (error) {
-      console.error('Error sending LCD message:', error);
-    }
-  };
-
-  return (
-    <div>
-      <button onClick={connectToDevice}>Connect to Device</button>
-      <button onClick={sendLCDMessage}>Send LCD Message</button>
-      <input
-        type="text"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-      />
-      <p>LCD Message: {lcdMessage}</p>
-    </div>
-  );
-}
-
-export default App;
+          const handleChange = (event) => {
+            setMessage(event.target.value);
+          };
+        
+          const sendCommand = async (command) => {
+            if (bleServer && bleServer.connected) {
+              try {
+                const service = await bleServer.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
+                const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
+                await characteristic.writeValue(new TextEncoder().encode(" " + message));
+                console.log(message);
+              } catch (err) {
+                setError(err.message);
+              }
+            }
+          };
+        
+          
+        
+          return (
+            <div>
+              <button onClick={connectToDevice} disabled={connected}>
+                {connected ? 'Connected' : 'Connect'}
+              </button>
+              <br />
+              <input type="text" value={message} onChange={handleChange} />
+              <button onClick={sendCommand} disabled={!connected}>
+                Send Message
+              </button>
+              
+              {error && <p>Error: {error}</p>}
+            </div>
+          );
+        }
+        
+        export default App;
+        
