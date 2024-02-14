@@ -6,6 +6,7 @@ function App() {
   const [error, setError] = useState(null);
   const [message, setMessage] = useState('');
   const [selectedLights, setSelectedLights] = useState(1); // State for selected number of lights
+  const [timer, setTimer] = useState(0);
 
   const connectToDevice = async () => {
     try {
@@ -28,12 +29,16 @@ function App() {
     setSelectedLights(parseInt(event.target.value)); // Update selected number of lights
   };
 
+  const handleTimerChange = (event) => {
+    setTimer(parseInt(event.target.value));
+  };
+
   const sendCommand = async (command) => {
     if (bleServer && bleServer.connected) {
       try {
         const service = await bleServer.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
         const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
-        const combinedMessage = JSON.stringify([" " + message, `${selectedLights}`]);
+        const combinedMessage = JSON.stringify([" " + message, `${selectedLights}`, `${timer}`]);
         await characteristic.writeValue(new TextEncoder().encode(combinedMessage)); 
         console.log(combinedMessage);
       } catch (err) {
@@ -53,9 +58,17 @@ function App() {
           <option key={index + 1} value={index + 1}>{index + 1}</option>
         ))}
       </select>
+      <p>What message do you want to send?</p>
       <input type="text" value={message} onChange={handleChange} />
+      <p>Timer duration:</p>
+      <select value={timer} onChange={handleTimerChange}>
+        {[...Array(60)].map((_, index) => (
+          <option key={index + 1} value={index + 1}>{index + 1}</option>
+        ))}
+      </select>
+      <p>minutes</p>
       <button onClick={sendCommand} disabled={!connected}>
-        Turn On Lights
+        Start Clock
       </button>
       
       {error && <p>Error: {error}</p>}
