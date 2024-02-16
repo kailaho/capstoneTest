@@ -9,6 +9,7 @@
     const [selectedLights, setSelectedLights] = useState(1); // State for selected number of lights
     const [timer, setTimer] = useState(0);
     const [mode, setMode] = useState(0);
+    const [activeMode, setActiveMode] = useState(null);
 
     const connectToDevice = async () => {
       try {
@@ -37,6 +38,7 @@
     
     const handleModeChange = (mode) =>{
       setMode(mode);
+      setActiveMode(mode);
     };
 
     const sendCommand = async (command) => {
@@ -53,34 +55,18 @@
       }
     };
 
-    return (
-      <div id ="wrapper">
-      <h1>Welcome to Bloom Clock</h1>
-      <div>
-        <div id ="modeWrapper"> 
-            <button className = "modeButton" onClick={() => handleModeChange(1)}>
-            Chime and Time
-          </button>
-
-          <button className = "modeButton" onClick={() => handleModeChange(2)}>
-            Time Banking
-          </button>
-
-          <button className = "modeButton" onClick={() => handleModeChange(3)}>
-            Task Setter
-          </button>
-
-        </div>
-
-
-        <div id="descProgWrapper">
-          <div id = "desc">
+    const renderMode = () => {
+      switch(mode){
+        case 1: 
+          return(
+            <>
+              <div id = "desc">
               <h3>Chime Mode: Set your clock to chime at a certain interval, and choose whether or not you want to set a timer.</h3>
           </div>
 
           <div id = "prog">
                 <button className= "blackButton" onClick={connectToDevice} disabled={connected}>
-                  {connected ? 'Connected' : 'Connect'}
+                  {connected ? 'Connected' : 'Connect to Clock'}
                 </button>
               
             
@@ -106,7 +92,50 @@
               {error && <p>Error: {error}</p>}
 
           </div>
+            </>
+          );
+        case 2:
+          return(
+            <h2>Mode 2</h2>
+          );
+        case 3:
+          return(
+            <h2>Mode 3</h2>
+          );
+        default:
+          return null;
+      };
+    };
 
+    return (
+      <div id ="wrapper">
+      <h1>Welcome to Bloom Clock</h1>
+      <div>
+        <div id ="modeWrapper"> 
+          <button
+              className={activeMode === 1 ? 'modeButton active' : 'modeButton'}
+              onClick={() => handleModeChange(1)}
+            >
+              Chime and Time
+            </button>
+            <button
+              className={activeMode === 2 ? 'modeButton active' : 'modeButton'}
+              onClick={() => handleModeChange(2)}
+            >
+              Time Banking
+            </button>
+            <button
+              className={activeMode === 3 ? 'modeButton active' : 'modeButton'}
+              onClick={() => handleModeChange(3)}
+            >
+              Task Setter
+            </button>
+
+        </div>
+
+
+        <div id="descProgWrapper">
+          {renderMode()}
         </div>
         
 

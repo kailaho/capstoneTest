@@ -26,6 +26,12 @@ body{
   font-weight: bold;
 }
 
+.modeButton.active {
+  background-color: white;
+  color: black;
+  font-weight: bold;
+}
+
 #modeWrapper{
   width: 30%;
   justify-content: space-around;
@@ -61,7 +67,7 @@ body{
   background-color: black;
   color: white;
   padding: 1em;
-  width: 10%;
+  width: 15%;
   border: none;
   border-radius: 2em;
   font-weight: bold;
