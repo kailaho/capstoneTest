@@ -10,6 +10,8 @@
     const [timer, setTimer] = useState(0);
     const [mode, setMode] = useState(0);
     const [activeMode, setActiveMode] = useState(null);
+    const [sound, setSound] = useState(null);
+    const [chimeTime, setChimeTime] = useState(0);
 
     const connectToDevice = async () => {
       try {
@@ -41,12 +43,21 @@
       setActiveMode(mode);
     };
 
+    const handleChimeTime = (event) => {
+      setChimeTime(parseInt(event.target.value));
+    };
+
+    const handleSoundChange = (value) => {
+      setSound(value);
+      console.log("sound value:" + value);
+    };
+
     const sendCommand = async (command) => {
       if (bleServer && bleServer.connected) {
         try {
           const service = await bleServer.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
           const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
-          const combinedMessage = JSON.stringify([`${mode}`, " " + message, `${selectedLights}`, `${timer}`]);
+          const combinedMessage = JSON.stringify([`${mode}`, " " + message, `${selectedLights}`, `${timer}`, `${sound}`, `${chimeTime}`]);
           await characteristic.writeValue(new TextEncoder().encode(combinedMessage)); 
           console.log(combinedMessage);
         } catch (err) {
@@ -68,22 +79,47 @@
                 <button className= "blackButton" onClick={connectToDevice} disabled={connected}>
                   {connected ? 'Connected' : 'Connect to Clock'}
                 </button>
-              
-            
-              {/* <select value={selectedLights} onChange={handleDropdownChange}>
-                {[...Array(12)].map((_, index) => (
-                  <option key={index + 1} value={index + 1}>{index + 1}</option>
-                ))}
-              </select> */}
-              
-              {/* <input type="text" value={message} onChange={handleChange} /> */}
+
               <p>I want to set a timer for:</p>
               <select id ="timerDuration" value={timer} onChange={handleTimerChange}>
+                <option value="0"></option>
                 {[...Array(60)].map((_, index) => (
                   <option key={index } value={index +1}>{index+1}</option>
                 ))}
               </select>
               <p>minutes</p>
+
+              <div className="radioWrapper">
+              <label>
+                <input className ="radioButton" type="radio" value="1" checked={sound=== 1} onChange={() => handleSoundChange(1)} />
+                Sound On
+              </label>
+
+              <label>
+                <input className = "radioButton" type="radio" value="0" checked={sound === 0} onChange={() => handleSoundChange(0)} />
+                Sound Off
+              </label>
+
+              <label>
+                <input className = "radioButton" type="radio" value="2" checked={sound === 2} onChange={() => handleSoundChange(2)} />
+                Chime at end of timer only
+              </label>
+
+
+              </div>
+
+              {sound === 1 && (
+              <div id="chimeWrapper">
+                <p>Chime every: </p>
+                <select id="chimeFreq" value={chimeTime} onChange={handleChimeTime}>
+                  <option value="0"></option>
+                  {[...Array(60)].map((_, index) => (
+                    <option key={index} value={index + 1}>{index + 1}</option>
+                  ))}
+                </select>
+                <p>minutes</p>
+              </div>
+            )}
 
               <button className="blackButton" onClick={sendCommand} disabled={!connected}>
                 Start Clock
@@ -102,6 +138,11 @@
           return(
             <h2>Mode 3</h2>
           );
+
+        case 4:
+          return(
+            <h2>Mode 4</h2>
+          );
         default:
           return null;
       };
@@ -112,6 +153,7 @@
       <h1>Welcome to Bloom Clock</h1>
       <div>
         <div id ="modeWrapper"> 
+          <p id="selectMode">Select a mode to begin: </p>
           <button
               className={activeMode === 1 ? 'modeButton active' : 'modeButton'}
               onClick={() => handleModeChange(1)}
@@ -129,6 +171,12 @@
               onClick={() => handleModeChange(3)}
             >
               Task Setter
+            </button>
+            <button
+              className={activeMode === 4 ? 'modeButton active' : 'modeButton'}
+              onClick={() => handleModeChange(4)}
+            >
+              Sequential Timer
             </button>
 
         </div>

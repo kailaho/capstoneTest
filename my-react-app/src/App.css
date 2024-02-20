@@ -33,13 +33,17 @@ body{
 }
 
 #modeWrapper{
-  width: 30%;
+  width: 50%;
   justify-content: space-around;
   text-align: center;
   display: flex;
   flex-direction: row;
-  margin-left: 33em;
+  margin-left: 17em;
   padding: 1em;
+}
+
+#selectMode{
+  color: white;
 }
 
 #descProgWrapper{
@@ -76,3 +80,21 @@ body{
 #timerDuration{
   width: 10%;
 }
+
+.radioWrapper{
+  padding: 1em;
+  display: flex;
+  flex-direction: column;
+  
+}
+
+
+#chimeWrapper{
+  padding: 1em;
+  width: 10em;
+}
+
+#chimeFreq{
+  width: 5em;
+}
+
