@@ -81,6 +81,11 @@ body{
   width: 10%;
 }
 
+#bankTask{
+  margin: 1em;
+  margin-left: 0em;
+}
+
 .radioWrapper{
   padding: 1em;
   display: flex;

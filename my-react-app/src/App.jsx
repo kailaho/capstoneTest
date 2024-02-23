@@ -13,6 +13,7 @@ function App() {
   const [chimeTime, setChimeTime] = useState(0);
   const [soundMode, setSoundMode] = useState(2); // Default to sound on
   const [tasks, setTasks] = useState(Array.from({ length: 5 }, () => ({task:'', time: 0})));
+  const [bankTask, setBankTask] = useState('');
 
   const connectToDevice = async () => {
     try {
@@ -52,6 +53,10 @@ function App() {
     setSoundMode(value);
   };
 
+  const handleBankTaskChange = (value) => {
+    setBankTask(value);
+  }
+
   const sendCommand = async (combinedMessage) => {
     if (bleServer && bleServer.connected) {
       try {
@@ -64,6 +69,7 @@ function App() {
       }
     }
   };
+
 
   const handleChangeTask = (index, value) => {
     const newTasks = [...tasks];
@@ -259,7 +265,77 @@ function App() {
           </>
         );
       case 4:
-        return <h2>Mode 4</h2>;
+        const timeBankingSettings = JSON.stringify([`${mode}`, `${timer}`, `${soundMode}`, `${chimeTime}`, bankTask]);
+        return (<>
+          <div id="desc">
+            <h3>Chime Mode: Set your clock to chime at a certain interval, and choose whether or not you want to set a timer.</h3>
+          </div>
+
+          <div id="prog">
+            <button className="blackButton" onClick={connectToDevice} disabled={connected}>
+              {connected ? 'Connected' : 'Connect to Clock'}
+            </button>
+
+            <div>
+            <label id="bankTask">Task: </label>
+            <input 
+              type="text" 
+              id="bankTask" 
+              maxLength={32} 
+              onChange={(e) => handleBankTaskChange(e.target.value)} 
+            />
+          </div>
+
+
+            <p>This task should take:</p>
+            <select id="timerDuration" value={timer} onChange={handleTimerChange}>
+              <option value="0"></option>
+              {[...Array(60)].map((_, index) => (
+                <option key={index} value={index + 1}>{index + 1}</option>
+              ))}
+            </select>
+            <p>minutes</p>
+
+            <div className="radioWrapper">
+              <label>
+                <input type="radio" value="1" checked={soundMode === 1} onChange={() => handleSoundChange(1)} />
+                Sound On
+              </label>
+              <label>
+                <input type="radio" value="2" checked={soundMode === 2} onChange={() => handleSoundChange(2)} />
+                Sound Off
+              </label>
+              <label>
+                <input type="radio" value="3" checked={soundMode === 3} onChange={() => handleSoundChange(3)} />
+                End of Timer Only
+              </label>
+              <label>
+                <input type="radio" value="4" checked={soundMode === 4} onChange={() => handleSoundChange(4)} />
+                With each petal
+              </label>
+            </div>
+
+            {soundMode === 1 && (
+              <div id="chimeWrapper">
+                <p>Chime every: </p>
+                <select id="chimeFreq" value={chimeTime} onChange={handleChimeTime}>
+                  <option value="0"></option>
+                  {[...Array(60)].map((_, index) => (
+                    <option key={index} value={index + 1}>{index + 1}</option>
+                  ))}
+                </select>
+                <p>minutes</p>
+              </div>
+            )}
+            
+
+            <button className="blackButton" onClick={() => sendCommand(timeBankingSettings)} disabled={!connected}>
+              Start Clock
+            </button>
+            
+            {error && <p>Error: {error}</p>}
+          </div>
+        </>);
       default:
         return null;
     }
