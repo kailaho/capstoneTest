@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './App.css';
 
 function App() {
@@ -15,16 +15,6 @@ function App() {
   const [tasks, setTasks] = useState(Array.from({ length: 5 }, () => ({task:'', time: 0})));
   const [bankTask, setBankTask] = useState('');
   const [reward, setReward] = useState(0);
-
-  useEffect(() => {
-    // Cleanup function
-    return () => {
-      if (bleServer && bleServer.connected) {
-        bleServer.disconnect();
-        setConnected(false);
-      }
-    };
-  }, [bleServer]);
 
   const connectToDevice = async () => {
     try {
@@ -71,24 +61,20 @@ function App() {
     setBankTask(value);
   }
 
-  const sendCommand = async (message) => {
-    try {
-      if (bleServer && bleServer.connected) {
+  const sendCommand = async (combinedMessage) => {
+    if (bleServer && bleServer.connected) {
+      try {
         const service = await bleServer.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
         const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
-        await characteristic.writeValue(new TextEncoder().encode(message));
-        console.log(message);
-      } else {
-        throw new Error('Bluetooth device is not connected.');
+        await characteristic.writeValue(new TextEncoder().encode(combinedMessage)); 
+        console.log(combinedMessage);
+      } catch (err) {
+        setError(err.message);
       }
-    } catch (err) {
-      setError(err.message);
     }
   };
-  
 
   const sendSequentially = async (message1, message2) =>{
-    console.log("in sendSequentially");
     if (bleServer && bleServer.connected) {
       try {
         const service = await bleServer.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
@@ -137,15 +123,6 @@ function App() {
     }
   };
 
-  const resetConnection = () => {
-    if (bleServer && bleServer.connected) {
-      bleServer.disconnect();
-      setConnected(false);
-      setBleServer(null);
-    }
-    connectToDevice();
-  };
-
 
 
   const renderMode = () => {
@@ -162,9 +139,6 @@ function App() {
               <button className="blackButton" onClick={connectToDevice} disabled={connected}>
                 {connected ? 'Connected' : 'Connect to Clock'}
               </button>
-              {/* <button className="blackButton" onClick={resetConnection}>
-                {connected ? 'Reconnected' : 'Reconnect to Clock'}
-              </button> */}
 
               <p>I want to set a timer for:</p>
               <select id="timerDuration" value={timer} onChange={handleTimerChange}>
@@ -399,7 +373,7 @@ function App() {
 
   return (
     <div id="wrapper">
-      <h1>Welcome to *name?*</h1>
+      <h1>Welcome to Bloom Clock</h1>
       <div>
         <div id="modeWrapper"> 
           <p id="selectMode">Select a mode to begin: </p>
