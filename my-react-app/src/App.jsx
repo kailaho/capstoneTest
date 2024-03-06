@@ -12,7 +12,7 @@ function App() {
   const [activeMode, setActiveMode] = useState(null);
   const [chimeTime, setChimeTime] = useState(0);
   const [soundMode, setSoundMode] = useState(2); // Default to sound on
-  const [tasks, setTasks] = useState(Array.from({ length: 5 }, () => ({task:'', time: 0})));
+  const [tasks, setTasks] = useState(Array.from({ length: 3 }, () => ({task:'', time: 0})));
   const [bankTask, setBankTask] = useState('');
   const [reward, setReward] = useState(0);
 
@@ -125,9 +125,9 @@ function App() {
         const service = await bleServer.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
         const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
         
-        // Iterate over each task and send it individually
+        
         for (let i = 0; i < tasks.length; i++) {
-          const taskToSend = JSON.stringify([2, tasks[i].task, tasks[i].time]);
+          const taskToSend = JSON.stringify([ 2, tasks[i].task, tasks[i].time]);
           console.log("Sending task:", taskToSend); // Add this line for logging
           await characteristic.writeValue(new TextEncoder().encode(taskToSend));
         }
@@ -257,7 +257,7 @@ function App() {
           </>
         );
       case 3:
-        const negativeTimeSettings = JSON.stringify([`${mode}`, `${timer}`, `${soundMode}`, `${chimeTime}`]);
+        const negativeTimeSettings = JSON.stringify([mode, timer, soundMode, chimeTime]);
         return(
           <>
             <div id="desc">
