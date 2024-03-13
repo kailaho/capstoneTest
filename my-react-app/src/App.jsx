@@ -85,6 +85,19 @@ function App() {
       setError(err.message);
     }
   };
+
+  const sendJsonArrays = async () => {
+    try {
+      const tasksData = tasks.map(task => ({ description: task.task, time: task.time }));
+      
+      for (const task of tasksData) {
+        const jsonString = JSON.stringify([2, task.description, task.time]);
+        await sendCommand(jsonString + ';'); // Add a delimiter ';' after each JSON array
+      }
+    } catch (err) {
+      setError(err.message);
+    }
+  };
   
 
   const sendSequentially = async (message1, message2) =>{
@@ -96,9 +109,9 @@ function App() {
         
         // Iterate over each task and send it individually
         console.log(message1);
-          await characteristic.writeValue(new TextEncoder().encode(message1));
+          await characteristic.writeValue(new TextEncoder().encode(message1 + ';'));
           console.log(message2);
-          await characteristic.writeValue(new TextEncoder().encode(message2));
+          await characteristic.writeValue(new TextEncoder().encode(message2 + ';'));
         
       } catch (err) {
         setError(err.message);
@@ -120,6 +133,7 @@ function App() {
   };
   // Function to send tasks sequentially
   const sendTasks = async () => {
+    console.log("in sendTasks");
     if (bleServer && bleServer.connected) {
       try {
         const service = await bleServer.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
@@ -248,7 +262,7 @@ function App() {
 
                         
 
-              <button className="blackButton" onClick={sendTasks} disabled={!connected}>
+              <button className="blackButton" onClick={sendJsonArrays} disabled={!connected}>
                 Start Clock
               </button>
               
