@@ -15,6 +15,11 @@ function App() {
   const [tasks, setTasks] = useState(Array.from({ length: 3 }, () => ({task:'', time: 0})));
   const [bankTask, setBankTask] = useState('');
   const [reward, setReward] = useState(0);
+  const [steadyColor, setSteadyColor] = useState('#ffffff');
+  const [startColor, setStartColor] = useState('#ffffff');
+  const [endColor, setEndColor] = useState('#ffffff');
+  const [useCustomColors, setUseCustomColors] = useState(false);
+  const [colorSet, setColorSet] = useState(false);
 
   useEffect(() => {
     // Cleanup function
@@ -71,6 +76,25 @@ function App() {
     setBankTask(value);
   }
 
+  const handleStartColor = (startColor, endColor) => {
+    setColorSet(true);
+    const newColor1 = startColor;
+    const newColor2 = endColor;
+    const r1 = parseInt(newColor1.substring(1, 3), 16);
+    const g1 = parseInt(newColor1.substring(3, 5), 16);
+    const b1 = parseInt(newColor1.substring(5, 7), 16);
+    const r2 = parseInt(newColor2.substring(1, 3), 16);
+    const g2 = parseInt(newColor2.substring(3, 5), 16);
+    const b2 = parseInt(newColor2.substring(5, 7), 16);
+    const colorMessage1 = ("8," + `${r1}`+ "," + `${g1}` + "," + `${b1}` + ",");
+    const colorMessage2 = (`${r2}`+ "," + `${g2}` + "," + `${b2}`);
+    console.log(colorMessage1);
+    console.log(colorMessage2);
+    sendSequentially(colorMessage1, colorMessage2);
+  };
+
+  
+
   const sendCommand = async (message) => {
     try {
       if (bleServer && bleServer.connected) {
@@ -86,18 +110,18 @@ function App() {
     }
   };
 
-  const sendJsonArrays = async () => {
-    try {
-      const tasksData = tasks.map(task => ({ description: task.task, time: task.time }));
+  // const sendJsonArrays = async () => {
+  //   try {
+  //     const tasksData = tasks.map(task => ({ description: task.task, time: task.time }));
       
-      for (const task of tasksData) {
-        const jsonString = JSON.stringify([2, task.description, task.time]);
-        await sendCommand(jsonString + ';'); // Add a delimiter ';' after each JSON array
-      }
-    } catch (err) {
-      setError(err.message);
-    }
-  };
+  //     for (const task of tasksData) {
+  //       const jsonString = JSON.stringify([2, task.description, task.time]);
+  //       await sendCommand(jsonString + ';'); // Add a delimiter ';' after each JSON array
+  //     }
+  //   } catch (err) {
+  //     setError(err.message);
+  //   }
+  // };
   
 
   const sendSequentially = async (message1, message2) =>{
@@ -109,9 +133,9 @@ function App() {
         
         // Iterate over each task and send it individually
         console.log(message1);
-          await characteristic.writeValue(new TextEncoder().encode(message1 + ';'));
+          await characteristic.writeValue(new TextEncoder().encode(message1 ));
           console.log(message2);
-          await characteristic.writeValue(new TextEncoder().encode(message2 + ';'));
+          await characteristic.writeValue(new TextEncoder().encode(message2));
         
       } catch (err) {
         setError(err.message);
@@ -141,10 +165,11 @@ function App() {
         
         
         for (let i = 0; i < tasks.length; i++) {
-          const taskToSend = JSON.stringify([ 2, tasks[i].task, tasks[i].time]);
+          const taskToSend = ( "2" + "," + tasks[i].task + "," + `${tasks[i].time}` + ",");
           console.log("Sending task:", taskToSend); // Add this line for logging
           await characteristic.writeValue(new TextEncoder().encode(taskToSend));
         }
+        await characteristic.writeValue(new TextEncoder().encode(`${reward}`));
       } catch (err) {
         setError(err.message);
       }
@@ -165,7 +190,7 @@ function App() {
   const renderMode = () => {
     switch(mode){
       case 1: 
-      const chimeTimeSettings = JSON.stringify([mode, timer, soundMode, chimeTime, reward]);
+      const chimeTimeSettings = (`${mode}` + "," + `${timer}` + "," + `${soundMode}` + "," +`${chimeTime}` + "," + `${reward}`);
         return(
           <>
             <div id="desc">
@@ -260,9 +285,14 @@ function App() {
                 </div>
               ))}
 
+              <label>
+                  <input type="radio" value="1" checked={reward === 1} onChange={() => handleRewardChange(1)} />
+                  Reward point at end of task sequence
+                </label>
+
                         
 
-              <button className="blackButton" onClick={sendJsonArrays} disabled={!connected}>
+              <button className="blackButton" onClick={sendTasks} disabled={!connected}>
                 Start Clock
               </button>
               
@@ -271,7 +301,7 @@ function App() {
           </>
         );
       case 3:
-        const negativeTimeSettings = JSON.stringify([mode, timer, soundMode, chimeTime]);
+        const negativeTimeSettings = (`${mode}` + "," + `${timer}`+ "," + `${soundMode}`+ "," + `${chimeTime}`);
         return(
           <>
             <div id="desc">
@@ -334,8 +364,8 @@ function App() {
           </>
         );
       case 4:
-        const timeBankingSettings = JSON.stringify([mode, timer, soundMode, chimeTime]);
-        const timeBankingTask = JSON.stringify([mode, bankTask]);
+        const timeBankingSettings = (`${mode}` + "," + `${timer}` + "," + `${soundMode}` + "," + `${chimeTime}`);
+        const timeBankingTask = ("," + bankTask);
         return (<>
           <div id="desc">
             <h3>Time Banking: Set a task for your child and how much time the task should take. They hit the button to begin, and when they are done, they push the button again. Whatever time is remaining gets added to their time bank as a reward!</h3>
@@ -413,7 +443,50 @@ function App() {
 
   return (
     <div id="wrapper">
-      <h1>Welcome to *name?*</h1>
+      
+      <h1>Welcome to ShineTime</h1>
+      <div>
+      <div>
+        <input
+          type="radio"
+          id="defaultColors"
+          value="default"
+          checked={!useCustomColors}
+          onChange={() => setUseCustomColors(false)}
+        />
+        <label htmlFor="defaultColors">Default Colors</label>
+
+        <input
+          type="radio"
+          id="chooseColors"
+          value="custom"
+          checked={useCustomColors}
+          onChange={() => setUseCustomColors(true)}
+        />
+        <label htmlFor="chooseColors">Choose Colors</label>
+      </div>
+
+      {useCustomColors && (
+         <div>
+         <label>Start Color: </label>
+         <input type="color" value={startColor} onChange={(e) => setStartColor(e.target.value)} />
+       
+         <label>End Color: </label>
+         <input type="color" value={endColor} onChange={(e) => setEndColor(e.target.value)} />
+
+       <button className="blackButton" onClick={() => handleStartColor(startColor, endColor)} >
+          {colorSet ? "Colors Set" : "Set Colors"}
+         </button>
+
+         <p>Brighter and more saturated colors tend to look better!</p>
+       
+    
+       </div>
+        
+      )}
+
+      
+    </div>
       <div>
         <div id="modeWrapper"> 
           <p id="selectMode">Select a mode to begin: </p>
