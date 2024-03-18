@@ -31,6 +31,17 @@ function App() {
     };
   }, [bleServer]);
 
+  const getCurrentTime = () => {
+    // Get the current time as milliseconds since midnight
+    const  now = new Date();
+    const hours = now.getHours() % 12 || 12;
+    const minutes = now.getMinutes();
+    
+    // Construct the time string in HH:MM:SS format
+    const currentTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    return currentTime;
+  };
+
   const connectToDevice = async () => {
     try {
       const device = await navigator.bluetooth.requestDevice({
@@ -39,6 +50,9 @@ function App() {
       const server = await device.gatt.connect();
       setBleServer(server);
       setConnected(true);
+      // const currentTime = getCurrentTime();
+      // sendCommand("9," + `${currentTime}`);
+      // console.log("sent: " + currentTime);
     } catch (err) {
       setError(err.message);
     }
@@ -87,7 +101,7 @@ function App() {
     const g2 = parseInt(newColor2.substring(3, 5), 16);
     const b2 = parseInt(newColor2.substring(5, 7), 16);
     const colorMessage1 = ("8," + `${r1}`+ "," + `${g1}` + "," + `${b1}` + ",");
-    const colorMessage2 = (`${r2}`+ "," + `${g2}` + "," + `${b2}`);
+    const colorMessage2 = (`${r2}`+ "," + `${g2}` + "," + `${b2}` + ",");
     console.log(colorMessage1);
     console.log(colorMessage2);
     sendSequentially(colorMessage1, colorMessage2);
@@ -201,6 +215,7 @@ function App() {
               <button className="blackButton" onClick={connectToDevice} disabled={connected}>
                 {connected ? 'Connected' : 'Connect to Clock'}
               </button>
+              
               {/* <button className="blackButton" onClick={resetConnection}>
                 {connected ? 'Reconnected' : 'Reconnect to Clock'}
               </button> */}
