@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import logo from '/logo2.png';
 
 function App() {
   const [connected, setConnected] = useState(false);
@@ -207,11 +208,14 @@ function App() {
       const chimeTimeSettings = (`${mode}` + "," + `${timer}` + "," + `${soundMode}` + "," +`${chimeTime}` + "," + `${reward}`);
         return(
           <>
+            
             <div id="desc">
-              <h3>Chime Mode: Set your clock to chime at a certain interval, and choose whether or not you want to set a timer.</h3>
+              <h2>Chime and Time Mode</h2>
+              <h3>Set a simple timer with the option to add sound or reward a point at the end of the timer.</h3>
             </div>
 
             <div id="prog">
+            <h3 id="titleColor">Timer Settings</h3>
               <button className="blackButton" onClick={connectToDevice} disabled={connected}>
                 {connected ? 'Connected' : 'Connect to Clock'}
               </button>
@@ -219,8 +223,10 @@ function App() {
               {/* <button className="blackButton" onClick={resetConnection}>
                 {connected ? 'Reconnected' : 'Reconnect to Clock'}
               </button> */}
-
-              <p>I want to set a timer for:</p>
+              
+            
+            <div id="timerSetFlex">
+              <p>I want to set a timer for</p>
               <select id="timerDuration" value={timer} onChange={handleTimerChange}>
                 <option value="0"></option>
                 {[...Array(60)].map((_, index) => (
@@ -228,6 +234,7 @@ function App() {
                 ))}
               </select>
               <p>minutes</p>
+            </div>
 
               <div className="radioWrapper">
                 <label>
@@ -254,9 +261,9 @@ function App() {
                 </label>
 
               {soundMode === 1 && (
-                <div id="chimeWrapper">
-                  <p>Chime every: </p>
-                  <select id="chimeFreq" value={chimeTime} onChange={handleChimeTime}>
+                <div id="chimeWrapper" className="miniFlex">
+                  <p className="taskSetterItem">Chime every </p>
+                  <select id="chimeFreq" className="taskSetterItem" value={chimeTime} onChange={handleChimeTime}>
                     <option value="0"></option>
                     {[...Array(60)].map((_, index) => (
                       <option key={index} value={index + 1}>{index + 1}</option>
@@ -273,6 +280,56 @@ function App() {
               
               {error && <p>Error: {error}</p>}
             </div>
+
+            <div id= "colorWrapper">
+            
+        <div id="chooseColorsWrapper">
+        <h3 id="titleColor">Color Customization</h3>
+        <div className="chooseColorGroup">
+          <input
+            type="radio"
+            id="defaultColors"
+            value="default"
+            checked={!useCustomColors}
+            onChange={() => setUseCustomColors(false)}
+          />
+          <label htmlFor="defaultColors">Default Colors</label>
+        </div>
+
+        <div className="chooseColorGroup">
+          <input
+            type="radio"
+            id="chooseColors"
+            value="custom"
+            checked={useCustomColors}
+            onChange={() => setUseCustomColors(true)}
+          />
+          <label htmlFor="chooseColors">Choose Colors</label>
+        </div>
+
+      </div>
+
+      {useCustomColors && (
+        <>
+         <div id="selectColorsWrapper">
+          <div className='selectColor'>
+         <label>Start Color: </label>
+         <input type="color" value={startColor} onChange={(e) => setStartColor(e.target.value)} />
+          </div>
+
+          <div className='selectColor'>
+         <label>End Color: </label>
+         <input type="color" value={endColor} onChange={(e) => setEndColor(e.target.value)} />
+         </div>
+       </div>
+       <button id="setColorsButton" onClick={() => handleStartColor(startColor, endColor)} >
+          {colorSet ? "Colors Set" : "Set Colors"}
+         </button>
+         <p id="colorNote">Brighter and more saturated colors tend to look better!</p>
+        </>
+      )}
+      
+      </div>
           </>
         );
       case 2:
@@ -280,18 +337,22 @@ function App() {
         return (
           <>
           <div id="desc">
-              <h3>Task Setter: Set a series of up to 5 tasks for your child to complete in sequence.</h3>
+              <h2>Task Setter</h2>
+              <h3>Set a series of up to 3 tasks for your child to complete in sequence. Each task gets it's own amount of time and starts when the button on the timer is pressed.</h3>
             </div>
 
             <div id="prog">
+            <h3 id="titleColor">Timer Settings</h3>
               <button className="blackButton" onClick={connectToDevice} disabled={connected}>
                 {connected ? 'Connected' : 'Connect to Clock'}
               </button>
 
               {tasks.map((task, index) => (
-                <div key={index}>
-                  <input type="text" value={task.description} maxLength={32} onChange={(e) => handleChangeTask(index, e.target.value)} />
-                  <select value={task.time} onChange={(e) => handleTaskTimer(e, index)}>
+                <div id="taskSetterWrapper"key={index}>
+                  <p className="taskSetterItem">Task: </p>
+                  <input className="taskSetterItem" type="text" value={task.description} maxLength={32} onChange={(e) => handleChangeTask(index, e.target.value)} />
+                  <p className="taskSetterItem">Time:</p>
+                  <select className="taskSetterItem"value={task.time} onChange={(e) => handleTaskTimer(e, index)}>
                   <option value="0"></option>
                     {[...Array(60)].map((_, index) => (
                       <option key={index} value={index + 1}>{index + 1} min</option>
@@ -300,7 +361,7 @@ function App() {
                 </div>
               ))}
 
-              <label>
+              <label id="taskReward">
                   <input type="radio" value="1" checked={reward === 1} onChange={() => handleRewardChange(1)} />
                   Reward point at end of task sequence
                 </label>
@@ -313,6 +374,56 @@ function App() {
               
               {error && <p>Error: {error}</p>}
             </div>
+
+            <div id= "colorWrapper">
+            
+        <div id="chooseColorsWrapper">
+        <h3 id="titleColor">Color Customization</h3>
+        <div className="chooseColorGroup">
+          <input
+            type="radio"
+            id="defaultColors"
+            value="default"
+            checked={!useCustomColors}
+            onChange={() => setUseCustomColors(false)}
+          />
+          <label htmlFor="defaultColors">Default Colors</label>
+        </div>
+
+        <div className="chooseColorGroup">
+          <input
+            type="radio"
+            id="chooseColors"
+            value="custom"
+            checked={useCustomColors}
+            onChange={() => setUseCustomColors(true)}
+          />
+          <label htmlFor="chooseColors">Choose Colors</label>
+        </div>
+
+      </div>
+
+      {useCustomColors && (
+        <>
+         <div id="selectColorsWrapper">
+          <div className='selectColor'>
+         <label>Start Color: </label>
+         <input type="color" value={startColor} onChange={(e) => setStartColor(e.target.value)} />
+          </div>
+
+          <div className='selectColor'>
+         <label>End Color: </label>
+         <input type="color" value={endColor} onChange={(e) => setEndColor(e.target.value)} />
+         </div>
+       </div>
+       <button id="setColorsButton" onClick={() => handleStartColor(startColor, endColor)} >
+          {colorSet ? "Colors Set" : "Set Colors"}
+         </button>
+         <p id="colorNote">Brighter and more saturated colors tend to look better!</p>
+        </>
+      )}
+      
+      </div>
           </>
         );
       case 3:
@@ -320,14 +431,17 @@ function App() {
         return(
           <>
             <div id="desc">
-              <h3>Negative Time: Help your child understand the concept of "negative time" or the idea that time continues to pass, even if they don't finish a task in the time alotted.</h3>
+            <h2>Negative Time</h2>
+              <h3>Help convey the idea that time continues to pass, even if the timer has stopped or a task is incomplete. Once the timer is up, the time starts to count back up and counts the added time.</h3>
             </div>
 
             <div id="prog">
+            <h3 id="titleColor">Timer Settings</h3>
               <button className="blackButton" onClick={connectToDevice} disabled={connected}>
                 {connected ? 'Connected' : 'Connect to Clock'}
               </button>
 
+              <div className="miniFlex">
               <p>I want to set a timer for:</p>
               <select id="timerDuration" value={timer} onChange={handleTimerChange}>
                 <option value="0"></option>
@@ -336,6 +450,7 @@ function App() {
                 ))}
               </select>
               <p>minutes</p>
+              </div>
 
               <div className="radioWrapper">
                 <label>
@@ -357,9 +472,9 @@ function App() {
               </div>
 
               {soundMode === 1 && (
-                <div id="chimeWrapper">
-                  <p>Chime every: </p>
-                  <select id="chimeFreq" value={chimeTime} onChange={handleChimeTime}>
+                <div id="chimeWrapper" className="miniFlex">
+                  <p className="taskSetterItem">Chime every </p>
+                  <select className="taskSetterItem" id="chimeFreq" value={chimeTime} onChange={handleChimeTime}>
                     <option value="0"></option>
                     {[...Array(60)].map((_, index) => (
                       <option key={index} value={index + 1}>{index + 1}</option>
@@ -376,6 +491,56 @@ function App() {
               
               {error && <p>Error: {error}</p>}
             </div>
+
+            <div id= "colorWrapper">
+            
+        <div id="chooseColorsWrapper">
+        <h3 id="titleColor">Color Customization</h3>
+        <div className="chooseColorGroup">
+          <input
+            type="radio"
+            id="defaultColors"
+            value="default"
+            checked={!useCustomColors}
+            onChange={() => setUseCustomColors(false)}
+          />
+          <label htmlFor="defaultColors">Default Colors</label>
+        </div>
+
+        <div className="chooseColorGroup">
+          <input
+            type="radio"
+            id="chooseColors"
+            value="custom"
+            checked={useCustomColors}
+            onChange={() => setUseCustomColors(true)}
+          />
+          <label htmlFor="chooseColors">Choose Colors</label>
+        </div>
+
+      </div>
+
+      {useCustomColors && (
+        <>
+         <div id="selectColorsWrapper">
+          <div className='selectColor'>
+         <label>Start Color: </label>
+         <input type="color" value={startColor} onChange={(e) => setStartColor(e.target.value)} />
+          </div>
+
+          <div className='selectColor'>
+         <label>End Color: </label>
+         <input type="color" value={endColor} onChange={(e) => setEndColor(e.target.value)} />
+         </div>
+       </div>
+       <button id="setColorsButton" onClick={() => handleStartColor(startColor, endColor)} >
+          {colorSet ? "Colors Set" : "Set Colors"}
+         </button>
+         <p id="colorNote">Brighter and more saturated colors tend to look better!</p>
+        </>
+      )}
+      
+      </div>
           </>
         );
       case 4:
@@ -383,10 +548,12 @@ function App() {
         const timeBankingTask = ("," + bankTask);
         return (<>
           <div id="desc">
-            <h3>Time Banking: Set a task for your child and how much time the task should take. They hit the button to begin, and when they are done, they push the button again. Whatever time is remaining gets added to their time bank as a reward!</h3>
+              <h2>Time Banking</h2>
+              <h3>Set a timer and a task to complete. The timer is started by pushing the button, and can be stopped once the task is complete by pushing the button again. Option to reward points for saved time.</h3>
           </div>
 
           <div id="prog">
+          <h3 id="titleColor">Timer Settings</h3>
             <button className="blackButton" onClick={connectToDevice} disabled={connected}>
               {connected ? 'Connected' : 'Connect to Clock'}
             </button>
@@ -401,7 +568,7 @@ function App() {
             />
           </div>
 
-
+          <div className="miniFlex">
             <p>This task should take:</p>
             <select id="timerDuration" value={timer} onChange={handleTimerChange}>
               <option value="0"></option>
@@ -410,7 +577,9 @@ function App() {
               ))}
             </select>
             <p>minutes</p>
-
+            </div>
+            
+                
             <div className="radioWrapper">
               <label>
                 <input type="radio" value="1" checked={soundMode === 1} onChange={() => handleSoundChange(1)} />
@@ -429,19 +598,23 @@ function App() {
                 With each petal
               </label>
             </div>
-
+            
+            
             {soundMode === 1 && (
-              <div id="chimeWrapper">
-                <p>Chime every: </p>
-                <select id="chimeFreq" value={chimeTime} onChange={handleChimeTime}>
+              
+              <div id="chimeWrapper" className="miniFlex">
+                <p className="taskSetterItem">Chime every </p>
+                <select id="chimeFreq" className="taskSetterItem" value={chimeTime} onChange={handleChimeTime}>
                   <option value="0"></option>
                   {[...Array(60)].map((_, index) => (
                     <option key={index} value={index + 1}>{index + 1}</option>
                   ))}
                 </select>
                 <p>minutes</p>
-              </div>
+                </div>
+              
             )}
+            
             
 
             <button className="blackButton" onClick={() => sendSequentially(timeBankingSettings, timeBankingTask)} disabled={!connected}>
@@ -450,59 +623,87 @@ function App() {
             
             {error && <p>Error: {error}</p>}
           </div>
+
+      <div id= "colorWrapper">
+            
+        <div id="chooseColorsWrapper">
+        <h3 id="titleColor">Color Customization</h3>
+        <div className="chooseColorGroup">
+          <input
+            type="radio"
+            id="defaultColors"
+            value="default"
+            checked={!useCustomColors}
+            onChange={() => setUseCustomColors(false)}
+          />
+          <label htmlFor="defaultColors">Default Colors</label>
+        </div>
+
+        <div className="chooseColorGroup">
+          <input
+            type="radio"
+            id="chooseColors"
+            value="custom"
+            checked={useCustomColors}
+            onChange={() => setUseCustomColors(true)}
+          />
+          <label htmlFor="chooseColors">Choose Colors</label>
+        </div>
+
+      </div>
+
+      {useCustomColors && (
+        <>
+         <div id="selectColorsWrapper">
+          <div className='selectColor'>
+         <label>Start Color: </label>
+         <input type="color" value={startColor} onChange={(e) => setStartColor(e.target.value)} />
+          </div>
+
+          <div className='selectColor'>
+         <label>End Color: </label>
+         <input type="color" value={endColor} onChange={(e) => setEndColor(e.target.value)} />
+         </div>
+       </div>
+       <button id="setColorsButton" onClick={() => handleStartColor(startColor, endColor)} >
+          {colorSet ? "Colors Set" : "Set Colors"}
+         </button>
+         <p id="colorNote">Brighter and more saturated colors tend to look better!</p>
+        </>
+      )}
+      
+      </div>
         </>);
       default:
-        return null;
+        return(
+          <>
+          <div id="welcomeContact">
+          <h3 id="welcomeStatement">ShineTime is an innovative solution for time management geared towards children with ADHD. This website is a portal that allows you to set different modes on the ShineTime timer based on your time management goals. Each mode is research-based and meant to help children with ADHD in celebrating their different way of understanding time while helping them accomplish tasks. 
+          </h3>
+          <div id="instructions">
+          <h3>Connection Instructions:</h3>
+          <ul>
+            <li>Step 1: Enable the WebBluetooth API on your browser.</li>
+            <li>Step 2: Connect to your timer. It should appear as "DSD Tech" on in the connection window. If you don't see it right away, please be patient!</li>
+          </ul>
+          </div>
+          <p id="contact">Contact or request a new mode: kaila.ho@colorado.edu</p>
+          </div>
+          </>
+        );
     }
   };
 
   return (
     <div id="wrapper">
-      
-      <h1>Welcome to ShineTime</h1>
-      <div>
-      <div>
-        <input
-          type="radio"
-          id="defaultColors"
-          value="default"
-          checked={!useCustomColors}
-          onChange={() => setUseCustomColors(false)}
-        />
-        <label htmlFor="defaultColors">Default Colors</label>
-
-        <input
-          type="radio"
-          id="chooseColors"
-          value="custom"
-          checked={useCustomColors}
-          onChange={() => setUseCustomColors(true)}
-        />
-        <label htmlFor="chooseColors">Choose Colors</label>
-      </div>
-
-      {useCustomColors && (
-         <div>
-         <label>Start Color: </label>
-         <input type="color" value={startColor} onChange={(e) => setStartColor(e.target.value)} />
-       
-         <label>End Color: </label>
-         <input type="color" value={endColor} onChange={(e) => setEndColor(e.target.value)} />
-
-       <button className="blackButton" onClick={() => handleStartColor(startColor, endColor)} >
-          {colorSet ? "Colors Set" : "Set Colors"}
-         </button>
-
-         <p>Brighter and more saturated colors tend to look better!</p>
-       
-    
-       </div>
+      <div id="topBar">
+        <div id="titleLogo">
+          <h1>Welcome to ShineTime</h1>
+          <img id="logo" src={logo} alt="Logo: Orange and Yellow Sun"/>
+        </div>
         
-      )}
+          
 
-      
-    </div>
-      <div>
         <div id="modeWrapper"> 
           <p id="selectMode">Select a mode to begin: </p>
           <button
@@ -531,10 +732,14 @@ function App() {
           </button>
         </div>
 
+    
+    </div>
+
         <div id="descProgWrapper">
           {renderMode()}
         </div>
-      </div>
+        
+      
     </div>
   );
 }
