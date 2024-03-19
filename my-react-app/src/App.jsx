@@ -674,6 +674,24 @@ function App() {
       
       </div>
         </>);
+
+      case 5:
+        return(
+          <>
+          <div id="welcomeContact">
+          <h3 id="welcomeStatement">ShineTime is an innovative solution for time management geared towards children with ADHD. This website is a portal that allows you to set different modes on the ShineTime timer based on your time management goals. Each mode is research-based and meant to help children with ADHD in celebrating their different way of understanding time while helping them accomplish tasks. 
+          </h3>
+          <div id="instructions">
+          <h3>Connection Instructions:</h3>
+          <ul>
+            <li>Step 1: Enable the WebBluetooth API on your browser.</li>
+            <li>Step 2: Connect to your timer. It should appear as "DSD Tech" on in the connection window. If you don't see it right away, please be patient!</li>
+          </ul>
+          </div>
+          <p id="contact">Contact or request a new mode: kaila.ho@colorado.edu</p>
+          </div>
+          </>
+        );
       default:
         return(
           <>
@@ -730,6 +748,13 @@ function App() {
           >
             Time Banking
           </button>
+          <button id="help"
+            className={activeMode === 5 ? 'modeButton active' : 'modeButton'}
+            onClick={() => handleModeChange(5)}
+          >
+            ?
+          </button>
+          
         </div>
 
     
