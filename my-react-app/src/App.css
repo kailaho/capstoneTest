@@ -11,6 +11,8 @@ h1{
   font-size: 2.5em;
 }
 
+
+
 p{
   font-size: 1.1em;
 }
@@ -24,16 +26,56 @@ ul{
 #instructions{
   justify-content: left;
   text-align: left;
-  font-size: 1em;
+  font-size: 1.2em;
+  background-color: rgb(242, 203, 95);
+ 
 }
+
+#welcomeImgWrapper{
+  height: 80vh;
+}
+
+#instructionh3{
+  font-weight: bold;
+  margin-left: 1.8em;
+  margin-top: 2em;
+  
+}
+
 #welcomeStatement{
-  font-size: 1.5em;
+  font-size: 1.85em;
+  margin: 1em;
+  padding: 1em;
+  border-radius: 2em;
+  background-color: transparent;
+  width: 50%;
+  margin-left: 23em;
+  margin-top: 2.5em;
+  text-align: left;
+  line-height: 1.5em;
+
+}
+
+#homeImg{
+  width: 30%;
+  height: auto;
+  border-radius: 2em;
   margin: 2em;
 }
 
-#contact{
-  margin-top: 15em;
-  font-size: .9em;
+
+.makeBold{
+  font-weight: bold;
+}
+
+.contact{
+  margin-top: 5em;
+  font-size: .7em;
+  margin-left: 37em;
+}
+
+#connectWrapper.connected{
+  background-color: black;
 }
 
 #welcomeContact{
@@ -41,6 +83,9 @@ ul{
   flex-direction: column;
   justify-content: center;
   text-align: center;
+  /* background-color: rgb(248, 246, 229); */
+ /* margin: 1em; */
+ /* border-radius: 2em; */
 }
 
 #logo{
@@ -112,7 +157,7 @@ body{
 }
 
 #setColorsButton{
-  background-color: rgb(242, 203, 95);
+  background-color: rgb(232, 114, 55);
   color: black;
   padding: .75em;
   border: none;
@@ -179,7 +224,7 @@ h3{
 
 }
 
-#prog{
+.prog{
   padding: 2em;
   padding-top: 1em;
   padding-bottom: 1em;
@@ -192,12 +237,17 @@ h3{
   justify-content: left;
 }
 
+#connectWrapper{
+  width: 15%;
+
+}
+
 .blackButton{
   background-color: rgb(232, 114, 55);
   color: black;
   padding: .75em;
   border: none;
-  width: 30%;
+  width: 100%;
   border-radius: 2em;
   font-weight: bold;
   margin-top: 1em;
@@ -207,6 +257,12 @@ h3{
  
 }
 
+.stepNumber{
+  background-color: black;
+  color: white;
+  padding:  .25em .6em .25em .6em;
+  border-radius: 2em;
+}
 #chooseColors{
   padding: 1em;
 }

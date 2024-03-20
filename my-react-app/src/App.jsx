@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import logo from '/logo2.png';
+import fillerImg from '/fillerImg2.jpg';
+
 
 function App() {
   const [connected, setConnected] = useState(false);
@@ -91,7 +93,7 @@ function App() {
     setBankTask(value);
   }
 
-  const handleStartColor = (startColor, endColor) => {
+  const handleStartColor = (color) => {
     setColorSet(true);
     const newColor1 = startColor;
     const newColor2 = endColor;
@@ -101,11 +103,9 @@ function App() {
     const r2 = parseInt(newColor2.substring(1, 3), 16);
     const g2 = parseInt(newColor2.substring(3, 5), 16);
     const b2 = parseInt(newColor2.substring(5, 7), 16);
-    const colorMessage1 = ("8," + `${r1}`+ "," + `${g1}` + "," + `${b1}` + ",");
-    const colorMessage2 = (`${r2}`+ "," + `${g2}` + "," + `${b2}` + ",");
-    console.log(colorMessage1);
-    console.log(colorMessage2);
-    sendSequentially(colorMessage1, colorMessage2);
+    const color1 = [8, r1, b1, g1, r2, b2, g2];
+    const colorBytes = new Uint8Array(color1);
+    sendArray(colorBytes);
   };
 
   
@@ -117,6 +117,44 @@ function App() {
         const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
         await characteristic.writeValue(new TextEncoder().encode(message));
         console.log(message);
+      } else {
+        throw new Error('Bluetooth device is not connected.');
+      }
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const sendCommand2 = async (array, string) => {
+    try {
+      if (bleServer && bleServer.connected) {
+        const service = await bleServer.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
+        const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
+        
+        await characteristic.writeValue(array);
+        console.log(array);
+        await characteristic.writeValue(new TextEncoder().encode('%'));
+        await characteristic.writeValue(new TextEncoder().encode(string));
+        console.log(string);
+        
+      } else {
+        throw new Error('Bluetooth device is not connected.');
+      }
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+
+  const sendArray = async (array) => {
+    try {
+      if (bleServer && bleServer.connected) {
+        const service = await bleServer.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
+        const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
+        
+        await characteristic.writeValue(array);
+        console.log(array);
+        
       } else {
         throw new Error('Bluetooth device is not connected.');
       }
@@ -148,7 +186,7 @@ function App() {
         
         // Iterate over each task and send it individually
         console.log(message1);
-          await characteristic.writeValue(new TextEncoder().encode(message1 ));
+          await characteristic.writeValue( new TextEncoder().encode(message1));
           console.log(message2);
           await characteristic.writeValue(new TextEncoder().encode(message2));
         
@@ -177,7 +215,7 @@ function App() {
       try {
         const service = await bleServer.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
         const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
-        
+        //await characteristic.writeValue(new TextEncoder().encode(14));
         
         for (let i = 0; i < tasks.length; i++) {
           const taskToSend = ( "2" + "," + tasks[i].task + "," + `${tasks[i].time}` + ",");
@@ -191,6 +229,48 @@ function App() {
     }
   };
 
+  const sendTasks2 = async () => {
+    console.log("in sendTasks");
+    if (bleServer && bleServer.connected) {
+      try {
+        const service = await bleServer.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
+        const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
+        
+       
+        const timeArr = [4];
+        timeArr[0] = 2;
+         for (let i = 0; i < 3; i++){
+            timeArr[i + 1] = tasks[i].time;
+        }
+
+        const timeArrBytes = new Uint8Array(timeArr);
+        await characteristic.writeValue(timeArrBytes);
+        console.log(timeArrBytes);
+        await characteristic.writeValue(new TextEncoder().encode("%"));
+        console.log("%");
+        await characteristic.writeValue(new TextEncoder().encode(tasks[0].task));
+        console.log(tasks[0].task);
+        await characteristic.writeValue(new TextEncoder().encode("," + tasks[1].task));
+        console.log(tasks[1].task);
+        await characteristic.writeValue(new TextEncoder().encode("," + tasks[2].task + ","));
+        console.log(tasks[2].task);
+        
+        
+        //await characteristic.writeValue(taskBytes);
+        console.log("here");
+        
+        
+        
+        //await characteristic.writeValue(timeArrBytes);
+        //console.log(taskBytes);
+        
+      } catch (err) {
+        setError(err.message);
+      }
+    }
+  };
+  
+
   const resetConnection = () => {
     if (bleServer && bleServer.connected) {
       bleServer.disconnect();
@@ -200,12 +280,34 @@ function App() {
     connectToDevice();
   };
 
+  const serializeArray = (array) => {
+    const byteArray =  new Uint8Array(array.length * 2);
+    for(let i = 0; i < array.length; i++){
+        const item = array[i];
+        let start = i * 2;
+
+        if(typeof item === 'string'){
+          byteArray[start] = 0;
+          byteArray[start +1] = item.length;
+          for(let j = 0; j < item.length; j++){
+            byteArray[start + j + 2] = item.charCodeAt(j);
+          }
+        } else if(typeof item === 'number'){
+          byteArray[start] = 1;
+          byteArray[start + 1] = item;
+        }
+    }
+
+    return byteArray;
+  }
 
 
   const renderMode = () => {
     switch(mode){
       case 1: 
-      const chimeTimeSettings = (`${mode}` + "," + `${timer}` + "," + `${soundMode}` + "," +`${chimeTime}` + "," + `${reward}`);
+      const chimeTimeSettings = [mode, timer, soundMode, chimeTime, reward];
+      const chimeTimeBytes= new Uint8Array(chimeTimeSettings);
+      
         return(
           <>
             
@@ -214,18 +316,76 @@ function App() {
               <h3>Set a simple timer with the option to add sound or reward a point at the end of the timer.</h3>
             </div>
 
-            <div id="prog">
-            <h3 id="titleColor">Timer Settings</h3>
+            {/* <div id="prog"> */}
+            <div className="prog" id="connectWrapper">
+            <h3 id="titleColor"><span className="stepNumber">1</span> Connect</h3>
               <button className="blackButton" onClick={connectToDevice} disabled={connected}>
                 {connected ? 'Connected' : 'Connect to Clock'}
               </button>
+              {error && <p>Error: {error}</p>}
+              </div>
               
               {/* <button className="blackButton" onClick={resetConnection}>
                 {connected ? 'Reconnected' : 'Reconnect to Clock'}
               </button> */}
               
             
+            
+            <div id= "colorWrapper">
+            
+        <div id="chooseColorsWrapper">
+        <h3 id="titleColor"><span className="stepNumber">2</span> Color Customization</h3>
+        <div className="chooseColorGroup">
+          <input
+            type="radio"
+            id="defaultColors"
+            value="default"
+            checked={!useCustomColors}
+            onChange={() => setUseCustomColors(false)}
+          />
+          <label htmlFor="defaultColors">Default Colors</label>
+        </div>
+
+        <div className="chooseColorGroup">
+          <input
+            type="radio"
+            id="chooseColors"
+            value="custom"
+            checked={useCustomColors}
+            onChange={() => setUseCustomColors(true)}
+          />
+          <label htmlFor="chooseColors">Choose Colors</label>
+        </div>
+
+      </div>
+
+      {useCustomColors && (
+        <>
+         <div id="selectColorsWrapper">
+          <div className='selectColor'>
+         <label>Start Color: </label>
+         <input type="color" value={startColor} onChange={(e) => setStartColor(e.target.value)} />
+          </div>
+
+          <div className='selectColor'>
+         <label>End Color: </label>
+         <input type="color" value={endColor} onChange={(e) => setEndColor(e.target.value)} />
+         </div>
+       </div>
+       <button id="setColorsButton" onClick={() => handleStartColor(startColor, endColor)} >
+          {colorSet ? "Set" : "Color Set"}
+         </button>
+         <p id="colorNote">Brighter and more saturated colors tend to look better!</p>
+        </>
+      )}
+      
+      </div>
+
+      
+      <div className="prog" >
+            <h3 id="titleColor"><span className="stepNumber">3</span> Timer Settings</h3>
             <div id="timerSetFlex">
+            
               <p>I want to set a timer for</p>
               <select id="timerDuration" value={timer} onChange={handleTimerChange}>
                 <option value="0"></option>
@@ -274,62 +434,13 @@ function App() {
               )}
               
   
-              <button className="blackButton" onClick={() => sendCommand(chimeTimeSettings)} disabled={!connected}>
+              <button className="blackButton" onClick={() => sendArray(chimeTimeBytes)} disabled={!connected}>
                 Start Clock
               </button>
               
-              {error && <p>Error: {error}</p>}
+              
+            {/* </div> */}
             </div>
-
-            <div id= "colorWrapper">
-            
-        <div id="chooseColorsWrapper">
-        <h3 id="titleColor">Color Customization</h3>
-        <div className="chooseColorGroup">
-          <input
-            type="radio"
-            id="defaultColors"
-            value="default"
-            checked={!useCustomColors}
-            onChange={() => setUseCustomColors(false)}
-          />
-          <label htmlFor="defaultColors">Default Colors</label>
-        </div>
-
-        <div className="chooseColorGroup">
-          <input
-            type="radio"
-            id="chooseColors"
-            value="custom"
-            checked={useCustomColors}
-            onChange={() => setUseCustomColors(true)}
-          />
-          <label htmlFor="chooseColors">Choose Colors</label>
-        </div>
-
-      </div>
-
-      {useCustomColors && (
-        <>
-         <div id="selectColorsWrapper">
-          <div className='selectColor'>
-         <label>Start Color: </label>
-         <input type="color" value={startColor} onChange={(e) => setStartColor(e.target.value)} />
-          </div>
-
-          <div className='selectColor'>
-         <label>End Color: </label>
-         <input type="color" value={endColor} onChange={(e) => setEndColor(e.target.value)} />
-         </div>
-       </div>
-       <button id="setColorsButton" onClick={() => handleStartColor(startColor, endColor)} >
-          {colorSet ? "Colors Set" : "Set Colors"}
-         </button>
-         <p id="colorNote">Brighter and more saturated colors tend to look better!</p>
-        </>
-      )}
-      
-      </div>
           </>
         );
       case 2:
@@ -341,12 +452,67 @@ function App() {
               <h3>Set a series of up to 3 tasks for your child to complete in sequence. Each task gets it's own amount of time and starts when the button on the timer is pressed.</h3>
             </div>
 
-            <div id="prog">
-            <h3 id="titleColor">Timer Settings</h3>
+            
+            <div className="prog" id="connectWrapper">
+            <h3 id="titleColor"><span className="stepNumber">1</span> Connect</h3>
               <button className="blackButton" onClick={connectToDevice} disabled={connected}>
                 {connected ? 'Connected' : 'Connect to Clock'}
               </button>
+              {error && <p>Error: {error}</p>}
+              </div>
 
+              <div id= "colorWrapper">
+            
+            <div id="chooseColorsWrapper">
+            <h3 id="titleColor"><span className="stepNumber">2</span> Color Customization</h3>
+            <div className="chooseColorGroup">
+              <input
+                type="radio"
+                id="defaultColors"
+                value="default"
+                checked={!useCustomColors}
+                onChange={() => setUseCustomColors(false)}
+              />
+              <label htmlFor="defaultColors">Default Colors</label>
+            </div>
+    
+            <div className="chooseColorGroup">
+              <input
+                type="radio"
+                id="chooseColors"
+                value="custom"
+                checked={useCustomColors}
+                onChange={() => setUseCustomColors(true)}
+              />
+              <label htmlFor="chooseColors">Choose Colors</label>
+            </div>
+    
+          </div>
+    
+          {useCustomColors && (
+            <>
+             <div id="selectColorsWrapper">
+              <div className='selectColor'>
+             <label>Start Color: </label>
+             <input type="color" value={startColor} onChange={(e) => setStartColor(e.target.value)} />
+              </div>
+    
+              <div className='selectColor'>
+             <label>End Color: </label>
+             <input type="color" value={endColor} onChange={(e) => setEndColor(e.target.value)} />
+             </div>
+           </div>
+           <button id="setColorsButton" onClick={() => handleStartColor(startColor, endColor)} >
+              {colorSet ? "Colors Set" : "Set Colors"}
+             </button>
+             <p id="colorNote">Brighter and more saturated colors tend to look better!</p>
+            </>
+          )}
+          
+          </div>
+
+            <div className="prog">
+            <h3 id="titleColor"><span className="stepNumber">3</span> Timer Settings</h3>
               {tasks.map((task, index) => (
                 <div id="taskSetterWrapper"key={index}>
                   <p className="taskSetterItem">Task: </p>
@@ -368,78 +534,86 @@ function App() {
 
                         
 
-              <button className="blackButton" onClick={sendTasks} disabled={!connected}>
+              <button className="blackButton" onClick={sendTasks2} disabled={!connected}>
                 Start Clock
               </button>
+              </div>
               
-              {error && <p>Error: {error}</p>}
-            </div>
-
-            <div id= "colorWrapper">
+              
             
-        <div id="chooseColorsWrapper">
-        <h3 id="titleColor">Color Customization</h3>
-        <div className="chooseColorGroup">
-          <input
-            type="radio"
-            id="defaultColors"
-            value="default"
-            checked={!useCustomColors}
-            onChange={() => setUseCustomColors(false)}
-          />
-          <label htmlFor="defaultColors">Default Colors</label>
-        </div>
 
-        <div className="chooseColorGroup">
-          <input
-            type="radio"
-            id="chooseColors"
-            value="custom"
-            checked={useCustomColors}
-            onChange={() => setUseCustomColors(true)}
-          />
-          <label htmlFor="chooseColors">Choose Colors</label>
-        </div>
-
-      </div>
-
-      {useCustomColors && (
-        <>
-         <div id="selectColorsWrapper">
-          <div className='selectColor'>
-         <label>Start Color: </label>
-         <input type="color" value={startColor} onChange={(e) => setStartColor(e.target.value)} />
-          </div>
-
-          <div className='selectColor'>
-         <label>End Color: </label>
-         <input type="color" value={endColor} onChange={(e) => setEndColor(e.target.value)} />
-         </div>
-       </div>
-       <button id="setColorsButton" onClick={() => handleStartColor(startColor, endColor)} >
-          {colorSet ? "Colors Set" : "Set Colors"}
-         </button>
-         <p id="colorNote">Brighter and more saturated colors tend to look better!</p>
-        </>
-      )}
-      
-      </div>
+           
           </>
         );
       case 3:
-        const negativeTimeSettings = (`${mode}` + "," + `${timer}`+ "," + `${soundMode}`+ "," + `${chimeTime}`);
+        const negativeTimeSettings = [mode, timer, soundMode, chimeTime];
+        const negBytes = new Uint8Array(negativeTimeSettings);
         return(
           <>
             <div id="desc">
             <h2>Negative Time</h2>
               <h3>Help convey the idea that time continues to pass, even if the timer has stopped or a task is incomplete. Once the timer is up, the time starts to count back up and counts the added time.</h3>
             </div>
-
-            <div id="prog">
-            <h3 id="titleColor">Timer Settings</h3>
+            <div className="prog" id="connectWrapper">
+            <h3 id="titleColor"><span className="stepNumber">1</span> Connect</h3>
               <button className="blackButton" onClick={connectToDevice} disabled={connected}>
                 {connected ? 'Connected' : 'Connect to Clock'}
               </button>
+              {error && <p>Error: {error}</p>}
+              </div>
+
+              <div id= "colorWrapper">
+            
+            <div id="chooseColorsWrapper">
+            <h3 id="titleColor"><span className="stepNumber">2</span> Color Customization</h3>
+            <div className="chooseColorGroup">
+              <input
+                type="radio"
+                id="defaultColors"
+                value="default"
+                checked={!useCustomColors}
+                onChange={() => setUseCustomColors(false)}
+              />
+              <label htmlFor="defaultColors">Default Colors</label>
+            </div>
+    
+            <div className="chooseColorGroup">
+              <input
+                type="radio"
+                id="chooseColors"
+                value="custom"
+                checked={useCustomColors}
+                onChange={() => setUseCustomColors(true)}
+              />
+              <label htmlFor="chooseColors">Choose Colors</label>
+            </div>
+    
+          </div>
+    
+          {useCustomColors && (
+            <>
+             <div id="selectColorsWrapper">
+              <div className='selectColor'>
+             <label>Start Color: </label>
+             <input type="color" value={startColor} onChange={(e) => setStartColor(e.target.value)} />
+              </div>
+    
+              <div className='selectColor'>
+             <label>End Color: </label>
+             <input type="color" value={endColor} onChange={(e) => setEndColor(e.target.value)} />
+             </div>
+           </div>
+           <button id="setColorsButton" onClick={() => handleStartColor(startColor, endColor)} >
+              {colorSet ? "Colors Set" : "Set Colors"}
+             </button>
+             <p id="colorNote">Brighter and more saturated colors tend to look better!</p>
+            </>
+          )}
+          
+          </div>
+
+          <div className="prog">
+          <h3 id="titleColor"><span className="stepNumber">3</span> Timer Settings</h3>
 
               <div className="miniFlex">
               <p>I want to set a timer for:</p>
@@ -485,79 +659,95 @@ function App() {
               )}
               
   
-              <button className="blackButton" onClick={() => sendCommand(negativeTimeSettings)} disabled={!connected}>
+              <button className="blackButton" onClick={() => sendArray(negBytes)} disabled={!connected}>
                 Start Clock
               </button>
-              
-              {error && <p>Error: {error}</p>}
             </div>
-
-            <div id= "colorWrapper">
-            
-        <div id="chooseColorsWrapper">
-        <h3 id="titleColor">Color Customization</h3>
-        <div className="chooseColorGroup">
-          <input
-            type="radio"
-            id="defaultColors"
-            value="default"
-            checked={!useCustomColors}
-            onChange={() => setUseCustomColors(false)}
-          />
-          <label htmlFor="defaultColors">Default Colors</label>
-        </div>
-
-        <div className="chooseColorGroup">
-          <input
-            type="radio"
-            id="chooseColors"
-            value="custom"
-            checked={useCustomColors}
-            onChange={() => setUseCustomColors(true)}
-          />
-          <label htmlFor="chooseColors">Choose Colors</label>
-        </div>
-
-      </div>
-
-      {useCustomColors && (
-        <>
-         <div id="selectColorsWrapper">
-          <div className='selectColor'>
-         <label>Start Color: </label>
-         <input type="color" value={startColor} onChange={(e) => setStartColor(e.target.value)} />
-          </div>
-
-          <div className='selectColor'>
-         <label>End Color: </label>
-         <input type="color" value={endColor} onChange={(e) => setEndColor(e.target.value)} />
-         </div>
-       </div>
-       <button id="setColorsButton" onClick={() => handleStartColor(startColor, endColor)} >
-          {colorSet ? "Colors Set" : "Set Colors"}
-         </button>
-         <p id="colorNote">Brighter and more saturated colors tend to look better!</p>
-        </>
-      )}
-      
-      </div>
+              
+              
           </>
         );
       case 4:
-        const timeBankingSettings = (`${mode}` + "," + `${timer}` + "," + `${soundMode}` + "," + `${chimeTime}`);
-        const timeBankingTask = ("," + bankTask);
+        const timeBankingSettings = [mode, timer, soundMode, chimeTime];
+        const byteArr =  new Uint8Array(4);
+        for(let i = 0; i <4; i++){
+          byteArr[i] = timeBankingSettings[i];
+        }
+        // for(let i = 0; i < byteArr.length; i++){
+        //   console.log("in case 4");
+        //   console.log(mode, timer, soundMode, chimeTime, bankTask);
+        //   console.log(byteArr[i]);
+        // }
+        
+        
         return (<>
           <div id="desc">
               <h2>Time Banking</h2>
               <h3>Set a timer and a task to complete. The timer is started by pushing the button, and can be stopped once the task is complete by pushing the button again. Option to reward points for saved time.</h3>
           </div>
 
-          <div id="prog">
-          <h3 id="titleColor">Timer Settings</h3>
-            <button className="blackButton" onClick={connectToDevice} disabled={connected}>
-              {connected ? 'Connected' : 'Connect to Clock'}
-            </button>
+          <div className="prog" id="connectWrapper">
+            <h3 id="titleColor"><span className="stepNumber">1</span> Connect</h3>
+              <button className="blackButton" onClick={connectToDevice} disabled={connected}>
+                {connected ? 'Connected' : 'Connect to Clock'}
+              </button>
+              {error && <p>Error: {error}</p>}
+              </div>
 
+              <div id= "colorWrapper">
+            
+            <div id="chooseColorsWrapper">
+            <h3 id="titleColor"><span className="stepNumber">2</span> Color Customization</h3>
+            <div className="chooseColorGroup">
+              <input
+                type="radio"
+                id="defaultColors"
+                value="default"
+                checked={!useCustomColors}
+                onChange={() => setUseCustomColors(false)}
+              />
+              <label htmlFor="defaultColors">Default Colors</label>
+            </div>
+    
+            <div className="chooseColorGroup">
+              <input
+                type="radio"
+                id="chooseColors"
+                value="custom"
+                checked={useCustomColors}
+                onChange={() => setUseCustomColors(true)}
+              />
+              <label htmlFor="chooseColors">Choose Colors</label>
+            </div>
+    
+          </div>
+    
+          {useCustomColors && (
+            <>
+             <div id="selectColorsWrapper">
+              <div className='selectColor'>
+             <label>Start Color: </label>
+             <input type="color" value={startColor} onChange={(e) => setStartColor(e.target.value)} />
+              </div>
+    
+              <div className='selectColor'>
+             <label>End Color: </label>
+             <input type="color" value={endColor} onChange={(e) => setEndColor(e.target.value)} />
+             </div>
+           </div>
+           <button id="setColorsButton" onClick={() => handleStartColor(startColor, endColor)} >
+              {colorSet ? "Colors Set" : "Set Colors"}
+             </button>
+             <p id="colorNote">Brighter and more saturated colors tend to look better!</p>
+            </>
+          )}
+          
+          </div>
+
+
+         <div className="prog">
+          <h3 id="titleColor"><span className="stepNumber">3</span> Timer Settings</h3>
+            
             <div>
             <label id="bankTask">Task: </label>
             <input 
@@ -615,97 +805,65 @@ function App() {
               
             )}
             
-            
 
-            <button className="blackButton" onClick={() => sendSequentially(timeBankingSettings, timeBankingTask)} disabled={!connected}>
+            <button className="blackButton" onClick={() => sendCommand2(byteArr, bankTask)} disabled={!connected}>
               Start Clock
             </button>
             
-            {error && <p>Error: {error}</p>}
-          </div>
-
-      <div id= "colorWrapper">
-            
-        <div id="chooseColorsWrapper">
-        <h3 id="titleColor">Color Customization</h3>
-        <div className="chooseColorGroup">
-          <input
-            type="radio"
-            id="defaultColors"
-            value="default"
-            checked={!useCustomColors}
-            onChange={() => setUseCustomColors(false)}
-          />
-          <label htmlFor="defaultColors">Default Colors</label>
         </div>
-
-        <div className="chooseColorGroup">
-          <input
-            type="radio"
-            id="chooseColors"
-            value="custom"
-            checked={useCustomColors}
-            onChange={() => setUseCustomColors(true)}
-          />
-          <label htmlFor="chooseColors">Choose Colors</label>
-        </div>
-
-      </div>
-
-      {useCustomColors && (
-        <>
-         <div id="selectColorsWrapper">
-          <div className='selectColor'>
-         <label>Start Color: </label>
-         <input type="color" value={startColor} onChange={(e) => setStartColor(e.target.value)} />
-          </div>
-
-          <div className='selectColor'>
-         <label>End Color: </label>
-         <input type="color" value={endColor} onChange={(e) => setEndColor(e.target.value)} />
-         </div>
-       </div>
-       <button id="setColorsButton" onClick={() => handleStartColor(startColor, endColor)} >
-          {colorSet ? "Colors Set" : "Set Colors"}
-         </button>
-         <p id="colorNote">Brighter and more saturated colors tend to look better!</p>
-        </>
-      )}
-      
-      </div>
         </>);
 
       case 5:
         return(
           <>
-          <div id="welcomeContact">
-          <h3 id="welcomeStatement">ShineTime is an innovative solution for time management geared towards children with ADHD. This website is a portal that allows you to set different modes on the ShineTime timer based on your time management goals. Each mode is research-based and meant to help children with ADHD in celebrating their different way of understanding time while helping them accomplish tasks. 
+          <div id="welcomeContact"
+          >
+          <div id="welcomeImgWrapper"style={{
+              backgroundImage: `url(${fillerImg})`,
+              backgroundSize: '100%',
+              backgroundPosition: 'center',}}>
+          <h3 id="welcomeStatement">ShineTime is an <span className="makeBold">innovative tool for time management </span>geared towards <span className="makeBold">children with ADHD</span>. This website is a <span className="makeBold">portal</span> that allows you to <span className="makeBold">set different modes</span> on the ShineTime timer based on your <span className="makeBold">time management goals</span>. Each mode is research-based and meant to help children with ADHD <span className="makeBold">celebrate their different way of understanding time</span> while helping them accomplish tasks. 
           </h3>
-          <div id="instructions">
-          <h3>Connection Instructions:</h3>
-          <ul>
-            <li>Step 1: Enable the WebBluetooth API on your browser.</li>
-            <li>Step 2: Connect to your timer. It should appear as "DSD Tech" on in the connection window. If you don't see it right away, please be patient!</li>
-          </ul>
           </div>
-          <p id="contact">Contact or request a new mode: kaila.ho@colorado.edu</p>
+          <div id="instructions">
+          <h3 id="instructionh3">Connection Instructions:</h3>
+          <ul>
+            <li><span className="makeBold">Step 1:</span>  Decide which mode is best for your time management and task setting needs.</li>
+            <li><span className="makeBold">Step 2:</span> Ensure the WebBluetooth API on your browser (automatically included with Chrome and Edge)</li>
+            <li><span className="makeBold">Step 3:</span> Connect to the clock. A Web Bluetooth API window will pop up asking for permission. The name of the connection is "DSD Tech". It may take a minute to load, so please be patient!</li>
+            <li><span className="makeBold">Step 4:</span> Customize the start and end colors of the timer if desired.</li>
+            <li><span className="makeBold">Step 5:</span> Personalize your timer settings and start whenever you're ready!</li>
+          </ul>
+          <p className="contact">Contact or request a new mode: kaila.ho@colorado.edu. Image Courtesy of Lukas Blazek via Unsplash</p>
+          </div>
+          
           </div>
           </>
         );
       default:
         return(
           <>
-          <div id="welcomeContact">
-          <h3 id="welcomeStatement">ShineTime is an innovative solution for time management geared towards children with ADHD. This website is a portal that allows you to set different modes on the ShineTime timer based on your time management goals. Each mode is research-based and meant to help children with ADHD in celebrating their different way of understanding time while helping them accomplish tasks. 
+          <div id="welcomeContact"
+          >
+          <div id="welcomeImgWrapper"style={{
+              backgroundImage: `url(${fillerImg})`,
+              backgroundSize: '100%',
+              backgroundPosition: 'center',}}>
+          <h3 id="welcomeStatement">ShineTime is an <span className="makeBold">innovative tool for time management </span>geared towards <span className="makeBold">children with ADHD</span>. This website is a <span className="makeBold">portal</span> that allows you to <span className="makeBold">set different modes</span> on the ShineTime timer based on your <span className="makeBold">time management goals</span>. Each mode is research-based and meant to help children with ADHD <span className="makeBold">celebrate their different way of understanding time</span> while helping them accomplish tasks. 
           </h3>
-          <div id="instructions">
-          <h3>Connection Instructions:</h3>
-          <ul>
-            <li>Step 1: Enable the WebBluetooth API on your browser.</li>
-            <li>Step 2: Connect to your timer. It should appear as "DSD Tech" on in the connection window. If you don't see it right away, please be patient!</li>
-          </ul>
           </div>
-          <p id="contact">Contact or request a new mode: kaila.ho@colorado.edu</p>
+          <div id="instructions">
+          <h3 id="instructionh3">Connection Instructions:</h3>
+          <ul>
+            <li><span className="makeBold">Step 1:</span>  Decide which mode is best for your time management and task setting needs.</li>
+            <li><span className="makeBold">Step 2:</span> Ensure the WebBluetooth API on your browser (automatically included with Chrome and Edge)</li>
+            <li><span className="makeBold">Step 3:</span> Connect to the clock. A Web Bluetooth API window will pop up asking for permission. The name of the connection is "DSD Tech". It may take a minute to load, so please be patient!</li>
+            <li><span className="makeBold">Step 4:</span> Customize the start and end colors of the timer if desired.</li>
+            <li><span className="makeBold">Step 5:</span> Personalize your timer settings and start whenever you're ready!</li>
+          </ul>
+          <p className="contact">Contact or request a new mode: kaila.ho@colorado.edu. Image Courtesy of Lukas Blazek via Unsplash</p>
+          </div>
+          
           </div>
           </>
         );
@@ -713,6 +871,7 @@ function App() {
   };
 
   return (
+    <>
     <div id="wrapper">
       <div id="topBar">
         <div id="titleLogo">
@@ -766,6 +925,8 @@ function App() {
         
       
     </div>
+    {/* <p id="contact">Contact or request a new mode: kaila.ho@colorado.edu</p> */}
+    </>
   );
 }
 
