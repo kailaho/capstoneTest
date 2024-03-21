@@ -23,6 +23,9 @@ function App() {
   const [endColor, setEndColor] = useState('#ffffff');
   const [useCustomColors, setUseCustomColors] = useState(false);
   const [colorSet, setColorSet] = useState(false);
+  const [rewardStr, setRewardStr] = useState('');
+  const [showReward, setShowReward] = useState(false);
+  
 
   useEffect(() => {
     // Cleanup function
@@ -84,7 +87,38 @@ function App() {
 
   const handleRewardChange = (value) => {
     setReward(value);
+    setShowReward(value == 1);
   };
+
+  const handleCustomRewardChange= (event) => {
+    setRewardStr(event.target.value);
+    
+  };
+
+  const handleCustomReward = async (value) => {
+    try {
+      if (bleServer && bleServer.connected) {
+        const service = await bleServer.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
+        const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
+        const rewardMode = [9];
+        const rewardModeByte = new Uint8Array(rewardMode);
+        await characteristic.writeValue(rewardModeByte);
+        console.log(rewardModeByte);
+        await characteristic.writeValue(new TextEncoder().encode('%'));
+        await characteristic.writeValue(new TextEncoder().encode(value + '#'));
+        console.log(value);
+        
+      } else {
+        throw new Error('Bluetooth device is not connected.');
+      }
+    } catch (err) {
+      setError(err.message);
+    }
+       
+  };
+
+
+
   const handleSoundChange = (value) => {
     setSoundMode(value);
   };
@@ -103,7 +137,7 @@ function App() {
     const r2 = parseInt(newColor2.substring(1, 3), 16);
     const g2 = parseInt(newColor2.substring(3, 5), 16);
     const b2 = parseInt(newColor2.substring(5, 7), 16);
-    const color1 = [8, r1, b1, g1, r2, b2, g2];
+    const color1 = [8, r1, g1, b1, r2, g2, b2];
     const colorBytes = new Uint8Array(color1);
     sendArray(colorBytes);
   };
@@ -134,7 +168,7 @@ function App() {
         await characteristic.writeValue(array);
         console.log(array);
         await characteristic.writeValue(new TextEncoder().encode('%'));
-        await characteristic.writeValue(new TextEncoder().encode(string));
+        await characteristic.writeValue(new TextEncoder().encode(string + '#'));
         console.log(string);
         
       } else {
@@ -237,10 +271,11 @@ function App() {
         const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
         
        
-        const timeArr = [4];
+        const timeArr = [5];
         timeArr[0] = 2;
+        timeArr[1] = reward;
          for (let i = 0; i < 3; i++){
-            timeArr[i + 1] = tasks[i].time;
+            timeArr[i + 2] = tasks[i].time;
         }
 
         const timeArrBytes = new Uint8Array(timeArr);
@@ -252,7 +287,7 @@ function App() {
         console.log(tasks[0].task);
         await characteristic.writeValue(new TextEncoder().encode("," + tasks[1].task));
         console.log(tasks[1].task);
-        await characteristic.writeValue(new TextEncoder().encode("," + tasks[2].task + ","));
+        await characteristic.writeValue(new TextEncoder().encode("," + tasks[2].task + "#"));
         console.log(tasks[2].task);
         
         
@@ -419,6 +454,22 @@ function App() {
                   <input type="radio" value="1" checked={reward === 1} onChange={() => handleRewardChange(1)} />
                   Reward point at end of timer
                 </label>
+                
+                {showReward && (
+                  <div className = "miniFlex">
+                    <div>
+                    <input type = "text" 
+                           value ={rewardStr}
+                           onChange = {handleCustomRewardChange}
+                           maxLength={17}
+                           placeholder='Enter custom reward'>
+                          
+                    </input>
+                    <p id="charLeft">Characters left: {17 - rewardStr.length}</p>
+                    </div>
+                    <button id = "setColorsButton" onClick={() => handleCustomReward(rewardStr)}>Change Reward</button>
+                  </div>
+                )}
 
               {soundMode === 1 && (
                 <div id="chimeWrapper" className="miniFlex">
@@ -488,6 +539,7 @@ function App() {
             </div>
     
           </div>
+          
     
           {useCustomColors && (
             <>
@@ -516,7 +568,7 @@ function App() {
               {tasks.map((task, index) => (
                 <div id="taskSetterWrapper"key={index}>
                   <p className="taskSetterItem">Task: </p>
-                  <input className="taskSetterItem" type="text" value={task.description} maxLength={32} onChange={(e) => handleChangeTask(index, e.target.value)} />
+                  <input className="taskSetterItem" type="text" value={task.description} maxLength={17} onChange={(e) => handleChangeTask(index, e.target.value)} />                
                   <p className="taskSetterItem">Time:</p>
                   <select className="taskSetterItem"value={task.time} onChange={(e) => handleTaskTimer(e, index)}>
                   <option value="0"></option>
@@ -527,10 +579,26 @@ function App() {
                 </div>
               ))}
 
-              <label id="taskReward">
+              <label id="pushLabel">
                   <input type="radio" value="1" checked={reward === 1} onChange={() => handleRewardChange(1)} />
                   Reward point at end of task sequence
                 </label>
+                
+                {showReward && (
+                  <div className = "miniFlex">
+                    <div>
+                    <input type = "text" 
+                           value ={rewardStr}
+                           onChange = {handleCustomRewardChange}
+                           maxLength={17}
+                           placeholder='Enter custom reward'>
+                          
+                    </input>
+                    <p id="charLeft">Characters left: {17 - rewardStr.length}</p>
+                    </div>
+                    <button id = "setColorsButton" onClick={() => handleCustomReward(rewardStr)}>Change Reward</button>
+                  </div>
+                )}
 
                         
 
@@ -546,7 +614,7 @@ function App() {
           </>
         );
       case 3:
-        const negativeTimeSettings = [mode, timer, soundMode, chimeTime];
+        const negativeTimeSettings = [mode, timer, soundMode, chimeTime, reward];
         const negBytes = new Uint8Array(negativeTimeSettings);
         return(
           <>
@@ -658,6 +726,26 @@ function App() {
                 </div>
               )}
               
+              <label id="pushLabel">
+                  <input type="radio" value="1" checked={reward === 1} onChange={() => handleRewardChange(1)} />
+                  Reward point at end of task sequence
+                </label>
+                
+                {showReward && (
+                  <div className = "miniFlex">
+                    <div>
+                    <input type = "text" 
+                           value ={rewardStr}
+                           onChange = {handleCustomRewardChange}
+                           maxLength={17}
+                           placeholder='Enter custom reward'>
+                          
+                    </input>
+                    <p id="charLeft">Characters left: {17 - rewardStr.length}</p>
+                    </div>
+                    <button id = "setColorsButton" onClick={() => handleCustomReward(rewardStr)}>Change Reward</button>
+                  </div>
+                )}
   
               <button className="blackButton" onClick={() => sendArray(negBytes)} disabled={!connected}>
                 Start Clock
@@ -668,7 +756,7 @@ function App() {
           </>
         );
       case 4:
-        const timeBankingSettings = [mode, timer, soundMode, chimeTime];
+        const timeBankingSettings = [mode, timer, soundMode, reward];
         const byteArr =  new Uint8Array(4);
         for(let i = 0; i <4; i++){
           byteArr[i] = timeBankingSettings[i];
@@ -753,7 +841,7 @@ function App() {
             <input 
               type="text" 
               id="bankTask" 
-              maxLength={32} 
+              maxLength={17} 
               onChange={(e) => handleBankTaskChange(e.target.value)} 
             />
           </div>
@@ -790,20 +878,27 @@ function App() {
             </div>
             
             
-            {soundMode === 1 && (
-              
-              <div id="chimeWrapper" className="miniFlex">
-                <p className="taskSetterItem">Chime every </p>
-                <select id="chimeFreq" className="taskSetterItem" value={chimeTime} onChange={handleChimeTime}>
-                  <option value="0"></option>
-                  {[...Array(60)].map((_, index) => (
-                    <option key={index} value={index + 1}>{index + 1}</option>
-                  ))}
-                </select>
-                <p>minutes</p>
-                </div>
-              
-            )}
+
+              <label id="pushLabel">
+                  <input type="radio" value="1" checked={reward === 1} onChange={() => handleRewardChange(1)} />
+                  Reward point at end of task sequence
+                </label>
+                
+                {showReward && (
+                  <div className = "miniFlex">
+                    <div>
+                    <input type = "text" 
+                           value ={rewardStr}
+                           onChange = {handleCustomRewardChange}
+                           maxLength={17}
+                           placeholder='Enter custom reward'>
+                          
+                    </input>
+                    <p id="charLeft">Characters left: {17 - rewardStr.length}</p>
+                    </div>
+                    <button id = "setColorsButton" onClick={() => handleCustomReward(rewardStr)}>Change Reward</button>
+                  </div>
+                )}
             
 
             <button className="blackButton" onClick={() => sendCommand2(byteArr, bankTask)} disabled={!connected}>

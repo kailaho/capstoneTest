@@ -78,6 +78,15 @@ ul{
   background-color: black;
 }
 
+#charLeft{
+  font-size: .75em;
+}
+
+#pushLabel{
+  margin-top: 1em;
+}
+
+
 #welcomeContact{
   display: flex;
   flex-direction: column;
