@@ -62,8 +62,6 @@ function App() {
     } catch (err) {
       setError(err.message);
     }
-
-    sendCommand("Initializing");
   };
 
   const handleChange = (event) => {
