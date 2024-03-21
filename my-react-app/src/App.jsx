@@ -274,8 +274,9 @@ function App() {
         const timeArr = [5];
         timeArr[0] = 2;
         timeArr[1] = reward;
+        timeArr[2] = soundMode;
          for (let i = 0; i < 3; i++){
-            timeArr[i + 2] = tasks[i].time;
+            timeArr[i + 3] = tasks[i].time;
         }
 
         const timeArrBytes = new Uint8Array(timeArr);
@@ -578,6 +579,21 @@ function App() {
                   </select>
                 </div>
               ))}
+
+              <div className="radioWrapper">
+                <label>
+                  <input type="radio" value="2" checked={soundMode === 2} onChange={() => handleSoundChange(2)} />
+                  Sound Off
+                </label>
+                <label>
+                  <input type="radio" value="3" checked={soundMode === 3} onChange={() => handleSoundChange(3)} />
+                  End of Timer Only
+                </label>
+                <label>
+                  <input type="radio" value="4" checked={soundMode === 4} onChange={() => handleSoundChange(4)} />
+                  With each petal
+                </label>
+              </div>
 
               <label id="pushLabel">
                   <input type="radio" value="1" checked={reward === 1} onChange={() => handleRewardChange(1)} />
