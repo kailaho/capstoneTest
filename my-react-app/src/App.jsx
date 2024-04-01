@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import logo from '/logo2.png';
 import fillerImg from '/fillerImg2.jpg';
+import instructions from '/pamphlet2.png';
 
 
 function App() {
@@ -936,15 +937,30 @@ function App() {
           <h3 id="welcomeStatement">ShineTime is an <span className="makeBold">innovative tool for time management </span>geared towards <span className="makeBold">children with ADHD</span>. This website is a <span className="makeBold">portal</span> that allows you to <span className="makeBold">set different modes</span> on the ShineTime timer based on your <span className="makeBold">time management goals</span>. Each mode is research-based and meant to help children with ADHD <span className="makeBold">celebrate their different way of understanding time</span> while helping them accomplish tasks. 
           </h3>
           </div>
+          <img id="pamphlet" alt="instruction pamphlet" src={instructions}/>
           <div id="instructions">
-          <h3 id="instructionh3">Connection Instructions:</h3>
+          <h3 id="instructionh3">Bluetooth Instructions:</h3>
           <ul>
-            <li><span className="makeBold">Step 1:</span>  Decide which mode is best for your time management and task setting needs.</li>
+          <li><span className="makeBold">Step 1:</span> After plugging in the timer, wait for the "Welcome to Shine Time" message on the screen, and the rainbow lights. This means you're ready to pair!</li>
             <li><span className="makeBold">Step 2:</span> Ensure the WebBluetooth API on your browser (automatically included with Chrome and Edge)</li>
             <li><span className="makeBold">Step 3:</span> Connect to the clock. A Web Bluetooth API window will pop up asking for permission. The name of the connection is "DSD Tech". It may take a minute to load, so please be patient!</li>
-            <li><span className="makeBold">Step 4:</span> Customize the start and end colors of the timer if desired.</li>
-            <li><span className="makeBold">Step 5:</span> Personalize your timer settings and start whenever you're ready!</li>
+            <li><span className="makeBold">Step 4:</span> Click "Start Timer" to send your customizations and settings to the timer.</li>
           </ul>
+          <h3 id="troubleTitle">Troubleshooting:</h3>
+          <div id="troubleshoot">
+            <div className="troubleCard">
+              <p><span className="faq">GATT error, no connection, or disconnected</span></p>
+              <p>Unplug the timer, then refresh the page. Plug the timer in again and wait for the rainbow lights, then try connecting again.</p>
+            </div>
+            <div className="troubleCard">
+              <p><span className="faq">Customized colors are not showing up correctly</span></p>
+              <p>Wait roughly 30 seconds and then try to send the colors again. If not, follow the same stres for no connection.</p>
+            </div>
+            <div className="troubleCard">
+              <p><span className="faq">Timer is unresponsive, time is incorrect, or screen is displaying gibberish</span></p>
+              <p>Wait roughly 30 seconds, and try to send the customization again. If it's not working, try to follow the same steps for no connection.</p>
+            </div>
+          </div>
           <p className="contact">Contact or request a new mode: kaila.ho@colorado.edu. Image Courtesy of Lukas Blazek via Unsplash</p>
           </div>
           
@@ -963,15 +979,30 @@ function App() {
           <h3 id="welcomeStatement">ShineTime is an <span className="makeBold">innovative tool for time management </span>geared towards <span className="makeBold">children with ADHD</span>. This website is a <span className="makeBold">portal</span> that allows you to <span className="makeBold">set different modes</span> on the ShineTime timer based on your <span className="makeBold">time management goals</span>. Each mode is research-based and meant to help children with ADHD <span className="makeBold">celebrate their different way of understanding time</span> while helping them accomplish tasks. 
           </h3>
           </div>
+          <img id="pamphlet" alt="instruction pamphlet" src={instructions}/>
           <div id="instructions">
-          <h3 id="instructionh3">Connection Instructions:</h3>
+          <h3 id="instructionh3">Bluetooth Instructions:</h3>
           <ul>
-            <li><span className="makeBold">Step 1:</span>  Decide which mode is best for your time management and task setting needs.</li>
+          <li><span className="makeBold">Step 1:</span> After plugging in the timer, wait for the "Welcome to Shine Time" message on the screen, and the rainbow lights. This means you're ready to pair!</li>
             <li><span className="makeBold">Step 2:</span> Ensure the WebBluetooth API on your browser (automatically included with Chrome and Edge)</li>
             <li><span className="makeBold">Step 3:</span> Connect to the clock. A Web Bluetooth API window will pop up asking for permission. The name of the connection is "DSD Tech". It may take a minute to load, so please be patient!</li>
-            <li><span className="makeBold">Step 4:</span> Customize the start and end colors of the timer if desired.</li>
-            <li><span className="makeBold">Step 5:</span> Personalize your timer settings and start whenever you're ready!</li>
+            <li><span className="makeBold">Step 4:</span> Click "Start Timer" to send your customizations and settings to the timer.</li>
           </ul>
+          <h3 id="troubleTitle">Troubleshooting:</h3>
+          <div id="troubleshoot">
+            <div className="troubleCard">
+              <p><span className="faq">GATT error, no connection, or disconnected</span></p>
+              <p>Unplug the timer, then refresh the page. Plug the timer in again and wait for the rainbow lights, then try connecting again.</p>
+            </div>
+            <div className="troubleCard">
+              <p><span className="faq">Customized colors are not showing up correctly</span></p>
+              <p>Wait roughly 30 seconds and then try to send the colors again. If not, follow the same stres for no connection.</p>
+            </div>
+            <div className="troubleCard">
+              <p><span className="faq">Timer is unresponsive, time is incorrect, or screen is displaying gibberish</span></p>
+              <p>Wait roughly 30 seconds, and try to send the customization again. If it's not working, try to follow the same steps for no connection.</p>
+            </div>
+          </div>
           <p className="contact">Contact or request a new mode: kaila.ho@colorado.edu. Image Courtesy of Lukas Blazek via Unsplash</p>
           </div>
           

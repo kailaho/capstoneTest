@@ -216,6 +216,12 @@ h3{
   font-weight: normal;
 }
 
+#pamphlet{
+ width: 90%;
+ padding: 1em;
+ margin-left: 3.5em;
+}
+
 #desc{
   background-color: rgb(242, 203, 95);
   /* box-shadow: 4px 0px 10px rgba(0, 0, 0, 0.1); */
@@ -343,3 +349,32 @@ label{
   height: 2.5em;
 }
 
+#troubleshoot{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  
+}
+
+.troubleCard{
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  color: black;
+  padding: 1em;
+  margin: 1em;
+  border-radius: 2em;
+}
+
+#troubleTitle{
+ 
+  margin: 0em;
+  padding-top: 1em;
+  padding-left: 1.3em;
+  font-weight: bold;
+}
+.faq{
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-top: 0em;
+}
