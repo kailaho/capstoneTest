@@ -713,10 +713,6 @@ function App() {
 
               <div className="radioWrapper">
                 <label>
-                  <input type="radio" value="1" checked={soundMode === 1} onChange={() => handleSoundChange(1)} />
-                  Sound On
-                </label>
-                <label>
                   <input type="radio" value="2" checked={soundMode === 2} onChange={() => handleSoundChange(2)} />
                   Sound Off
                 </label>
@@ -950,7 +946,7 @@ function App() {
           <div id="troubleshoot">
             <div className="troubleCard">
               <p><span className="faq">GATT error, no connection, or disconnected</span></p>
-              <p>Unplug the timer, then refresh the page. Plug the timer in again and wait for the rainbow lights, then try connecting again.</p>
+              <p>Refresh the page and try again. If this does not work, unplug the timer, then refresh the page. Plug the timer in again and wait for the rainbow lights, then try connecting again.</p>
             </div>
             <div className="troubleCard">
               <p><span className="faq">Customized colors are not showing up correctly</span></p>
@@ -992,7 +988,7 @@ function App() {
           <div id="troubleshoot">
             <div className="troubleCard">
               <p><span className="faq">GATT error, no connection, or disconnected</span></p>
-              <p>Unplug the timer, then refresh the page. Plug the timer in again and wait for the rainbow lights, then try connecting again.</p>
+              <p>Refresh the page and try again. If this does not work, unplug the timer, then refresh the page. Plug the timer in again and wait for the rainbow lights, then try connecting again.</p>
             </div>
             <div className="troubleCard">
               <p><span className="faq">Customized colors are not showing up correctly</span></p>
