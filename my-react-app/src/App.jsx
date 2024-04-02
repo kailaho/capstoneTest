@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import logo from '/logo2.png';
-import fillerImg from '/fillerImg2.jpg';
+import fillerImg from '/fillerImg5.jpg';
 import instructions from '/pamphlet2.png';
 
 
@@ -26,7 +26,8 @@ function App() {
   const [colorSet, setColorSet] = useState(false);
   const [rewardStr, setRewardStr] = useState('');
   const [showReward, setShowReward] = useState(false);
-  
+  const [showSteps, setShowSteps] = useState(0);
+  const [story, setStory] = useState(false);
 
   useEffect(() => {
     // Cleanup function
@@ -38,6 +39,9 @@ function App() {
     };
   }, [bleServer]);
 
+ const handleStory = (value) => {
+  setStory(value);
+ }
   const getCurrentTime = () => {
     // Get the current time as milliseconds since midnight
     const  now = new Date();
@@ -118,6 +122,9 @@ function App() {
        
   };
 
+  const handleTroubleshoot = (value) => {
+    setShowSteps(value);
+  };
 
 
   const handleSoundChange = (value) => {
@@ -436,7 +443,7 @@ function App() {
               <div className="radioWrapper">
                 <label>
                   <input type="radio" value="1" checked={soundMode === 1} onChange={() => handleSoundChange(1)} />
-                  Sound On
+                  Interval Chime
                 </label>
                 <label>
                   <input type="radio" value="2" checked={soundMode === 2} onChange={() => handleSoundChange(2)} />
@@ -452,6 +459,10 @@ function App() {
                 </label>
               </div>
 
+              <label>
+                  <input type="radio" value="0" checked={reward === 0} onChange={() => handleRewardChange(0)} />
+                  Skip reward
+                </label>
               <label>
                   <input type="radio" value="1" checked={reward === 1} onChange={() => handleRewardChange(1)} />
                   Reward point at end of timer
@@ -488,7 +499,7 @@ function App() {
               
   
               <button className="blackButton" onClick={() => sendArray(chimeTimeBytes)} disabled={!connected}>
-                Start Clock
+                Start Timer
               </button>
               
               
@@ -595,7 +606,11 @@ function App() {
                   With each petal
                 </label>
               </div>
-
+              
+              <label>
+                  <input type="radio" value="0" checked={reward === 0} onChange={() => handleRewardChange(0)} />
+                  Skip reward
+                </label>
               <label id="pushLabel">
                   <input type="radio" value="1" checked={reward === 1} onChange={() => handleRewardChange(1)} />
                   Reward point at end of task sequence
@@ -620,7 +635,7 @@ function App() {
                         
 
               <button className="blackButton" onClick={sendTasks2} disabled={!connected}>
-                Start Clock
+                Start Timer
               </button>
               </div>
               
@@ -739,6 +754,10 @@ function App() {
                 </div>
               )}
               
+              <label>
+                  <input type="radio" value="0" checked={reward === 0} onChange={() => handleRewardChange(0)} />
+                  Skip reward
+                </label>
               <label id="pushLabel">
                   <input type="radio" value="1" checked={reward === 1} onChange={() => handleRewardChange(1)} />
                   Reward point at end of task sequence
@@ -761,7 +780,7 @@ function App() {
                 )}
   
               <button className="blackButton" onClick={() => sendArray(negBytes)} disabled={!connected}>
-                Start Clock
+                Start Timer
               </button>
             </div>
               
@@ -873,10 +892,6 @@ function App() {
                 
             <div className="radioWrapper">
               <label>
-                <input type="radio" value="1" checked={soundMode === 1} onChange={() => handleSoundChange(1)} />
-                Sound On
-              </label>
-              <label>
                 <input type="radio" value="2" checked={soundMode === 2} onChange={() => handleSoundChange(2)} />
                 Sound Off
               </label>
@@ -889,8 +904,11 @@ function App() {
                 With each petal
               </label>
             </div>
-            
-            
+              
+            <label>
+                  <input type="radio" value="0" checked={reward === 0} onChange={() => handleRewardChange(0)} />
+                  Skip reward
+                </label>           
 
               <label id="pushLabel">
                   <input type="radio" value="1" checked={reward === 1} onChange={() => handleRewardChange(1)} />
@@ -915,7 +933,7 @@ function App() {
             
 
             <button className="blackButton" onClick={() => sendCommand2(byteArr, bankTask)} disabled={!connected}>
-              Start Clock
+              Start Timer
             </button>
             
         </div>
@@ -926,18 +944,13 @@ function App() {
           <>
           <div id="welcomeContact"
           >
-          <div id="welcomeImgWrapper"style={{
-              backgroundImage: `url(${fillerImg})`,
-              backgroundSize: '100%',
-              backgroundPosition: 'center',}}>
-          <h3 id="welcomeStatement">ShineTime is an <span className="makeBold">innovative tool for time management </span>geared towards <span className="makeBold">children with ADHD</span>. This website is a <span className="makeBold">portal</span> that allows you to <span className="makeBold">set different modes</span> on the ShineTime timer based on your <span className="makeBold">time management goals</span>. Each mode is research-based and meant to help children with ADHD <span className="makeBold">celebrate their different way of understanding time</span> while helping them accomplish tasks. 
-          </h3>
-          </div>
+          
+          <h3><span id = "gettingStarted" className = "makeBold">Instructions and Troubleshooting Tips</span></h3>
           <img id="pamphlet" alt="instruction pamphlet" src={instructions}/>
           <div id="instructions">
           <h3 id="instructionh3">Bluetooth Instructions:</h3>
           <ul>
-          <li><span className="makeBold">Step 1:</span> After plugging in the timer, wait for the "Welcome to Shine Time" message on the screen, and the rainbow lights. This means you're ready to pair!</li>
+          <li><span className="makeBold">Step 1:</span> After plugging in the timer, wait for the "Welcome to Shine Time" message on the screen, chime, and the rainbow lights. This means you're ready to pair!</li>
             <li><span className="makeBold">Step 2:</span> Ensure the WebBluetooth API on your browser (automatically included with Chrome and Edge)</li>
             <li><span className="makeBold">Step 3:</span> Connect to the clock. A Web Bluetooth API window will pop up asking for permission. The name of the connection is "DSD Tech". It may take a minute to load, so please be patient!</li>
             <li><span className="makeBold">Step 4:</span> Click "Start Timer" to send your customizations and settings to the timer.</li>
@@ -945,19 +958,25 @@ function App() {
           <h3 id="troubleTitle">Troubleshooting:</h3>
           <div id="troubleshoot">
             <div className="troubleCard">
-              <p><span className="faq">GATT error, no connection, or disconnected</span></p>
-              <p>Refresh the page and try again. If this does not work, unplug the timer, then refresh the page. Plug the timer in again and wait for the rainbow lights, then try connecting again.</p>
+              <p><span value= "1" onClick = {() => handleTroubleshoot(1)} className="faq">GATT error, no connection, or disconnected</span></p>
+              {showSteps === 1 && (
+                <p>Refresh the page and try again. If this does not work, unplug the timer, then refresh the page. Plug the timer in again and wait for the rainbow lights, then try connecting again.</p>
+              )}
             </div>
             <div className="troubleCard">
-              <p><span className="faq">Customized colors are not showing up correctly</span></p>
-              <p>Wait roughly 10 seconds and then try to send the colors again. If not, follow the same steps for no connection.</p>
+              <p><span value= "2" onClick = {() => handleTroubleshoot(2)} className="faq">Customized colors are not showing up correctly</span></p>
+              {showSteps === 2 && (
+                <p>Wait roughly 30 seconds and then try to send the colors again. If not, follow the same stres for no connection.</p>
+              )}
             </div>
             <div className="troubleCard">
-              <p><span className="faq">Timer is unresponsive, time is incorrect, or screen is displaying gibberish</span></p>
-              <p>Wait roughly 10 seconds, and try to send the customization again. If it's not working, try to follow the same steps for no connection. Sometimes it takes the bluetooth a second to catch up if you are sending multiple commands at once.</p>
+              <p><span value= "3" onClick={() => handleTroubleshoot(3)}className="faq">Timer is unresponsive, time is incorrect, or screen is displaying gibberish</span></p>
+              {showSteps === 3 && (
+                <p>Wait roughly 30 seconds, and try to send the customization again. If it's not working, try to follow the same steps for no connection.</p>
+              )}
             </div>
           </div>
-          <p className="contact">Contact or request a new mode: kaila.ho@colorado.edu. Image Courtesy of Lukas Blazek via Unsplash</p>
+          <p className="contact">Contact or request a new mode: kaila.ho@colorado.edu. Image Courtesy of insung yoon via Unsplash</p>
           </div>
           
           </div>
@@ -974,12 +993,24 @@ function App() {
               backgroundPosition: 'center',}}>
           <h3 id="welcomeStatement">ShineTime is an <span className="makeBold">innovative tool for time management </span>geared towards <span className="makeBold">children with ADHD</span>. This website is a <span className="makeBold">portal</span> that allows you to <span className="makeBold">set different modes</span> on the ShineTime timer based on your <span className="makeBold">time management goals</span>. Each mode is research-based and meant to help children with ADHD <span className="makeBold">celebrate their different way of understanding time</span> while helping them accomplish tasks. 
           </h3>
+          
+
           </div>
+          <div id="storyCanvas">
+          <button id ="storyButton" onClick={() => handleStory(true)}>
+            <span className = "makeBold">The Story Behind ShineTime ▼</span>
+          </button>
+          {story &&(
+              <p id="story">
+              This product is inspired by the power of assistive technology to help users in their every day lives and a passion for creating tools for children with learning disabilities. The journey of this product focused largely on designing with, not for, a community that could benefit from its functionality and was an amazing opportunity to collaborate closely with a community of families navigating the challenges and unique perspectives posed by ADHD. The aim was to create a timer that wasn't just functional but also visually appealing, providing an engaging way for children to engage with time and task management without the distraction of screen-based solutions. The intention is that a parent could customize a timer experience for their child with functionality ranging from task setting to auditory feedback which then would help them see time passing in an engaging and tailored manner. Through various modes, parents can guide their children to better understand the concept of time in ways tailored to their unique learning styles with the goal of celebrating their distinctive perception of time.</p>
+            )} 
+          </div>
+          <h3><span id = "gettingStarted" className = "makeBold">Getting Started</span></h3>
           <img id="pamphlet" alt="instruction pamphlet" src={instructions}/>
           <div id="instructions">
           <h3 id="instructionh3">Bluetooth Instructions:</h3>
           <ul>
-          <li><span className="makeBold">Step 1:</span> After plugging in the timer, wait for the "Welcome to Shine Time" message on the screen, and the rainbow lights. This means you're ready to pair!</li>
+          <li><span className="makeBold">Step 1:</span> After plugging in the timer, wait for the "Welcome to Shine Time" message on the screen, chime, and the rainbow lights. This means you're ready to pair!</li>
             <li><span className="makeBold">Step 2:</span> Ensure the WebBluetooth API on your browser (automatically included with Chrome and Edge)</li>
             <li><span className="makeBold">Step 3:</span> Connect to the clock. A Web Bluetooth API window will pop up asking for permission. The name of the connection is "DSD Tech". It may take a minute to load, so please be patient!</li>
             <li><span className="makeBold">Step 4:</span> Click "Start Timer" to send your customizations and settings to the timer.</li>
@@ -987,19 +1018,25 @@ function App() {
           <h3 id="troubleTitle">Troubleshooting:</h3>
           <div id="troubleshoot">
             <div className="troubleCard">
-              <p><span className="faq">GATT error, no connection, or disconnected</span></p>
-              <p>Refresh the page and try again. If this does not work, unplug the timer, then refresh the page. Plug the timer in again and wait for the rainbow lights, then try connecting again.</p>
+              <p><span value= "1" onClick = {() => handleTroubleshoot(1)} className="faq">GATT error, no connection, or disconnected</span></p>
+              {showSteps === 1 && (
+                <p>Refresh the page and try again. If this does not work, unplug the timer, then refresh the page. Plug the timer in again and wait for the rainbow lights, then try connecting again.</p>
+              )}
             </div>
             <div className="troubleCard">
-              <p><span className="faq">Customized colors are not showing up correctly</span></p>
-              <p>Wait roughly 30 seconds and then try to send the colors again. If not, follow the same stres for no connection.</p>
+              <p><span value= "2" onClick = {() => handleTroubleshoot(2)} className="faq">Customized colors are not showing up correctly</span></p>
+              {showSteps === 2 && (
+                <p>Wait roughly 30 seconds and then try to send the colors again. If not, follow the same stres for no connection.</p>
+              )}
             </div>
             <div className="troubleCard">
-              <p><span className="faq">Timer is unresponsive, time is incorrect, or screen is displaying gibberish</span></p>
-              <p>Wait roughly 30 seconds, and try to send the customization again. If it's not working, try to follow the same steps for no connection.</p>
+              <p><span value= "3" onClick={() => handleTroubleshoot(3)}className="faq">Timer is unresponsive, time is incorrect, or screen is displaying gibberish</span></p>
+              {showSteps === 3 && (
+                <p>Wait roughly 30 seconds, and try to send the customization again. If it's not working, try to follow the same steps for no connection.</p>
+              )}
             </div>
           </div>
-          <p className="contact">Contact or request a new mode: kaila.ho@colorado.edu. Image Courtesy of Lukas Blazek via Unsplash</p>
+          <p className="contact">Contact or request a new mode: kaila.ho@colorado.edu. Image Courtesy of insung yoon via Unsplash</p>
           </div>
           
           </div>

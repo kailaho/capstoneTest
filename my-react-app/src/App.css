@@ -27,7 +27,7 @@ ul{
   justify-content: left;
   text-align: left;
   font-size: 1.2em;
-  background-color: rgb(242, 203, 95);
+  
  
 }
 
@@ -49,7 +49,7 @@ ul{
   border-radius: 2em;
   background-color: transparent;
   width: 50%;
-  margin-left: 23em;
+  margin-left: 20em;
   margin-top: 2.5em;
   text-align: left;
   line-height: 1.5em;
@@ -353,28 +353,64 @@ label{
   display: flex;
   flex-direction: row;
   justify-content: space-around;
+  margin: 1em;
   
 }
 
 .troubleCard{
   display: flex;
   flex-direction: column;
-  background-color: white;
+  background-color: rgb(242, 203, 95);
   color: black;
   padding: 1em;
   margin: 1em;
   border-radius: 2em;
+  font-size: .9em;
+
 }
 
 #troubleTitle{
  
   margin: 0em;
   padding-top: 1em;
-  padding-left: 1.3em;
+  padding-left: 2em;
+  font-size: 1.2em;
   font-weight: bold;
 }
 .faq{
   font-weight: bold;
-  font-size: 1.1em;
+  font-size: .9em;
   margin-top: 0em;
+}
+
+#storyButton{
+  background-color: black;
+  color: white;
+  font-size: 1em;
+  border-radius: 1em;
+  padding: 1em;
+  border: none;
+}
+
+#storyCanvas{
+  padding: 1em;
+  padding-left: 2em;
+  padding-right: 2em;
+  line-height: 1.8em;
+  font-size: 1.2em;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2em;
+ 
+}
+
+#gettingStarted{
+  font-size: 1.2em;
+  background-color:  rgb(242, 203, 95) ;
+  width: 100%;
+  padding: .5em;
+  border-radius: 2em;
+}
+
+#story{
+  text-align: left;
 }
