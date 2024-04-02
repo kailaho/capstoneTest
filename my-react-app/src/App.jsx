@@ -950,11 +950,11 @@ function App() {
             </div>
             <div className="troubleCard">
               <p><span className="faq">Customized colors are not showing up correctly</span></p>
-              <p>Wait roughly 30 seconds and then try to send the colors again. If not, follow the same stres for no connection.</p>
+              <p>Wait roughly 10 seconds and then try to send the colors again. If not, follow the same steps for no connection.</p>
             </div>
             <div className="troubleCard">
               <p><span className="faq">Timer is unresponsive, time is incorrect, or screen is displaying gibberish</span></p>
-              <p>Wait roughly 30 seconds, and try to send the customization again. If it's not working, try to follow the same steps for no connection.</p>
+              <p>Wait roughly 10 seconds, and try to send the customization again. If it's not working, try to follow the same steps for no connection. Sometimes it takes the bluetooth a second to catch up if you are sending multiple commands at once.</p>
             </div>
           </div>
           <p className="contact">Contact or request a new mode: kaila.ho@colorado.edu. Image Courtesy of Lukas Blazek via Unsplash</p>
