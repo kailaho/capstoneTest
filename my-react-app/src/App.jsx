@@ -445,6 +445,18 @@ function App() {
                   <input type="radio" value="1" checked={soundMode === 1} onChange={() => handleSoundChange(1)} />
                   Interval Chime
                 </label>
+                {soundMode === 1 && (
+                <div id="chimeWrapper" className="miniFlex">
+                  <p className="taskSetterItem">Chime every </p>
+                  <select id="chimeFreq" className="taskSetterItem" value={chimeTime} onChange={handleChimeTime}>
+                    <option value="0"></option>
+                    {[...Array(60)].map((_, index) => (
+                      <option key={index} value={index + 1}>{index + 1}</option>
+                    ))}
+                  </select>
+                  <p>minutes</p>
+                </div>
+              )}
                 <label>
                   <input type="radio" value="2" checked={soundMode === 2} onChange={() => handleSoundChange(2)} />
                   Sound Off
@@ -484,18 +496,7 @@ function App() {
                   </div>
                 )}
 
-              {soundMode === 1 && (
-                <div id="chimeWrapper" className="miniFlex">
-                  <p className="taskSetterItem">Chime every </p>
-                  <select id="chimeFreq" className="taskSetterItem" value={chimeTime} onChange={handleChimeTime}>
-                    <option value="0"></option>
-                    {[...Array(60)].map((_, index) => (
-                      <option key={index} value={index + 1}>{index + 1}</option>
-                    ))}
-                  </select>
-                  <p>minutes</p>
-                </div>
-              )}
+              
               
   
               <button className="blackButton" onClick={() => sendArray(chimeTimeBytes)} disabled={!connected}>
