@@ -961,13 +961,13 @@ function App() {
             <div className="troubleCard">
               <p><span value= "1" onClick = {() => handleTroubleshoot(1)} className="faq">GATT error, no connection, or disconnected</span></p>
               {showSteps === 1 && (
-                <p>Refresh the page and try again. If this does not work, unplug the timer, then refresh the page. Plug the timer in again and wait for the rainbow lights, then try connecting again.</p>
+                <p>Refresh the page and try again - sometimes it may take multiple refreshes. If this does not work, unplug the timer, then refresh the page. Plug the timer in again and wait for the rainbow lights, then try connecting again.</p>
               )}
             </div>
             <div className="troubleCard">
               <p><span value= "2" onClick = {() => handleTroubleshoot(2)} className="faq">Customized colors are not showing up correctly</span></p>
               {showSteps === 2 && (
-                <p>Wait roughly 30 seconds and then try to send the colors again. If not, follow the same stres for no connection.</p>
+                <p>The colors that you chose will flash briefly after clicking "set colors." If the colors seem incorrect or you see "mode error", wait roughly 10 to 15 seconds and then try to send the colors again. If this doesn't work, follow the same stres for no connection.</p>
               )}
             </div>
             <div className="troubleCard">
@@ -1021,13 +1021,13 @@ function App() {
             <div className="troubleCard">
               <p><span value= "1" onClick = {() => handleTroubleshoot(1)} className="faq">GATT error, no connection, or disconnected</span></p>
               {showSteps === 1 && (
-                <p>Refresh the page and try again. If this does not work, unplug the timer, then refresh the page. Plug the timer in again and wait for the rainbow lights, then try connecting again.</p>
+                <p>Refresh the page and try again - sometimes it may take multiple refreshes. If this does not work, unplug the timer, then refresh the page. Plug the timer in again and wait for the rainbow lights, then try connecting again.</p>
               )}
             </div>
             <div className="troubleCard">
               <p><span value= "2" onClick = {() => handleTroubleshoot(2)} className="faq">Customized colors are not showing up correctly</span></p>
               {showSteps === 2 && (
-                <p>Wait roughly 30 seconds and then try to send the colors again. If not, follow the same stres for no connection.</p>
+                <p>The colors that you chose will flash briefly after clicking "set colors." If the colors seem incorrect or you see "mode error", wait roughly 10 to 15 seconds and then try to send the colors again. If this doesn't work, follow the same stres for no connection.</p>
               )}
             </div>
             <div className="troubleCard">
