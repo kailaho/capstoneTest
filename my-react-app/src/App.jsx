@@ -42,32 +42,55 @@ function App() {
  const handleStory = (value) => {
   setStory(value);
  }
-  const getCurrentTime = () => {
-    // Get the current time as milliseconds since midnight
-    const  now = new Date();
-    const hours = now.getHours() % 12 || 12;
-    const minutes = now.getMinutes();
-    
-    // Construct the time string in HH:MM:SS format
-    const currentTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-    return currentTime;
-  };
 
-  const connectToDevice = async () => {
-    try {
-      const device = await navigator.bluetooth.requestDevice({
-        filters: [{ services: ['0000ffe0-0000-1000-8000-00805f9b34fb'] }],
-      });
-      const server = await device.gatt.connect();
-      setBleServer(server);
-      setConnected(true);
-      // const currentTime = getCurrentTime();
-      // sendCommand("9," + `${currentTime}`);
-      // console.log("sent: " + currentTime);
-    } catch (err) {
-      setError(err.message);
-    }
-  };
+
+  // Function to connect to the BLE peripheral and interact with the string characteristic
+const connectToDevice = async () => {
+  try {
+    // Request a device that matches the service UUID
+    const device = await navigator.bluetooth.requestDevice({
+      filters: [{ services: ['19b10000-e8f2-537e-4f6c-d104768a1214'] }],
+    });
+
+    // Connect to the GATT server of the device
+    const server = await device.gatt.connect();
+
+    // Get the service
+    const service = await server.getPrimaryService('19b10000-e8f2-537e-4f6c-d104768a1214');
+
+    // Get the characteristic
+    //const characteristic = await service.getCharacteristic('19b10002-e8f2-537e-4f6c-d104768a1214');
+
+    setBleServer(server);
+    setConnected(true);
+    
+    // Write data to the characteristic
+
+    // Disconnect from the device
+    // await device.gatt.disconnect();
+  } catch (error) {
+    console.error('Error:', error);
+  }
+};
+
+const sendChimeTime = async () => {
+  if(bleServer){
+    console.log("connected");
+    const service = await bleServer.getPrimaryService('19b10000-e8f2-537e-4f6c-d104768a1214');
+    const BLEmodeCharis = await service.getCharacteristic('19b10021-e8f2-537e-4f6c-d104768a1214');
+    await BLEmodeCharis.writeValue(new TextEncoder().encode('4'));
+    console.log("BLE mode sent: " + '1');
+    const chimeTimeCharis = await service.getCharacteristic('19b10031-e8f2-537e-4f6c-d104768a1214');
+    await chimeTimeCharis.writeValue(new TextEncoder().encode(`${mode}` +"," + `${chimeTime}`  + "," + `${soundMode}`  + "," + `${timer}`  + "," + `${reward}` ));
+   
+
+  } else{
+    console.log("connection error");
+  }
+};
+
+// Call the function to connect to the device
+
 
   const handleChange = (event) => {
     setMessage(event.target.value);
@@ -100,27 +123,7 @@ function App() {
     
   };
 
-  const handleCustomReward = async (value) => {
-    try {
-      if (bleServer && bleServer.connected) {
-        const service = await bleServer.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
-        const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
-        const rewardMode = [9];
-        const rewardModeByte = new Uint8Array(rewardMode);
-        await characteristic.writeValue(rewardModeByte);
-        console.log(rewardModeByte);
-        await characteristic.writeValue(new TextEncoder().encode('%'));
-        await characteristic.writeValue(new TextEncoder().encode(value + '#'));
-        console.log(value);
-        
-      } else {
-        throw new Error('Bluetooth device is not connected.');
-      }
-    } catch (err) {
-      setError(err.message);
-    }
-       
-  };
+  
 
   const handleTroubleshoot = (value) => {
     setShowSteps(value);
@@ -133,9 +136,42 @@ function App() {
 
   const handleBankTaskChange = (value) => {
     setBankTask(value);
+  };
+
+  const sendNegativeTime = async () => {
+    if(bleServer){
+      console.log("connected");
+      const service = await bleServer.getPrimaryService('19b10000-e8f2-537e-4f6c-d104768a1214');
+      const BLEmodeCharis = await service.getCharacteristic('19b10021-e8f2-537e-4f6c-d104768a1214');
+      await BLEmodeCharis.writeValue(new TextEncoder().encode(5));
+
+      const negTimeCharis = await service.getCharacteristic('19b10032-e8f2-537e-4f6c-d104768a1214');
+      await negTimeCharis.writeValue(new TextEncoder().encode(`${mode}`+ "," +`${chimeTime}`+ "," +`${soundMode}`+ "," +`${timer}`+"," + `${reward}`));
+      
+  
+    } else{
+      console.log("connection error");
+    }
+
+  };
+
+  const sendTimeBanking = async () =>{
+    if(bleServer){
+      console.log("connected");
+      const service = await bleServer.getPrimaryService('19b10000-e8f2-537e-4f6c-d104768a1214');
+      const BLEmodeCharis = await service.getCharacteristic('19b10021-e8f2-537e-4f6c-d104768a1214');
+      await BLEmodeCharis.writeValue(new TextEncoder().encode(6));
+
+      const negTimeCharis = await service.getCharacteristic('19b10033-e8f2-537e-4f6c-d104768a1214');
+      await negTimeCharis.writeValue(new TextEncoder().encode(`${mode}`+ "," + `${soundMode}`+ "," +`${timer}`+","+`${reward}` + "," + `${bankTask}`));
+      
+  
+    } else{
+      console.log("connection error");
+    }
   }
 
-  const handleStartColor = (color) => {
+  const handleStartColor = async (color) => {
     setColorSet(true);
     const newColor1 = startColor;
     const newColor2 = endColor;
@@ -147,97 +183,45 @@ function App() {
     const b2 = parseInt(newColor2.substring(5, 7), 16);
     const color1 = [8, r1, g1, b1, r2, g2, b2];
     const colorBytes = new Uint8Array(color1);
-    sendArray(colorBytes);
-  };
 
-  
+    if(bleServer){
+      console.log("connected");
+      const service = await bleServer.getPrimaryService('19b10000-e8f2-537e-4f6c-d104768a1214');
+      const BLEmodeCharis = await service.getCharacteristic('19b10021-e8f2-537e-4f6c-d104768a1214');
+      await BLEmodeCharis.writeValue(new TextEncoder().encode(2));
 
-  const sendCommand = async (message) => {
-    try {
-      if (bleServer && bleServer.connected) {
-        const service = await bleServer.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
-        const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
-        await characteristic.writeValue(new TextEncoder().encode(message));
-        console.log(message);
-      } else {
-        throw new Error('Bluetooth device is not connected.');
-      }
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  const sendCommand2 = async (array, string) => {
-    try {
-      if (bleServer && bleServer.connected) {
-        const service = await bleServer.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
-        const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
-        
-        await characteristic.writeValue(array);
-        console.log(array);
-        await characteristic.writeValue(new TextEncoder().encode('%'));
-        await characteristic.writeValue(new TextEncoder().encode(string + '#'));
-        console.log(string);
-        
-      } else {
-        throw new Error('Bluetooth device is not connected.');
-      }
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-
-  const sendArray = async (array) => {
-    try {
-      if (bleServer && bleServer.connected) {
-        const service = await bleServer.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
-        const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
-        
-        await characteristic.writeValue(array);
-        console.log(array);
-        
-      } else {
-        throw new Error('Bluetooth device is not connected.');
-      }
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  // const sendJsonArrays = async () => {
-  //   try {
-  //     const tasksData = tasks.map(task => ({ description: task.task, time: task.time }));
+      const colorStrCharis = await service.getCharacteristic('19b10019-e8f2-537e-4f6c-d104768a1214');
+      await colorStrCharis.writeValue(new TextEncoder().encode(colorBytes));
+      console.log("reward string: " + colorBytes);
       
-  //     for (const task of tasksData) {
-  //       const jsonString = JSON.stringify([2, task.description, task.time]);
-  //       await sendCommand(jsonString + ';'); // Add a delimiter ';' after each JSON array
-  //     }
-  //   } catch (err) {
-  //     setError(err.message);
-  //   }
-  // };
+      
   
-
-  const sendSequentially = async (message1, message2) =>{
-    console.log("in sendSequentially");
-    if (bleServer && bleServer.connected) {
-      try {
-        const service = await bleServer.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
-        const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
-        
-        // Iterate over each task and send it individually
-        console.log(message1);
-          await characteristic.writeValue( new TextEncoder().encode(message1));
-          console.log(message2);
-          await characteristic.writeValue(new TextEncoder().encode(message2));
-        
-      } catch (err) {
-        setError(err.message);
-      }
+    } else{
+      console.log("connection error");
     }
     
   };
+
+  const sendTasks2 = async () => {
+    if(bleServer){
+      console.log("connected");
+      const service = await bleServer.getPrimaryService('19b10000-e8f2-537e-4f6c-d104768a1214');
+      const BLEmodeCharis = await service.getCharacteristic('19b10021-e8f2-537e-4f6c-d104768a1214');
+      await BLEmodeCharis.writeValue(new TextEncoder().encode(4));
+      const characteristic = await service.getCharacteristic('19b10031-e8f2-537e-4f6c-d104768a1214');
+      //const characteristic2 = await service.getCharacteristic('19b10034-e8f2-537e-4f6c-d104768a1214');
+        
+      await characteristic.writeValue(new TextEncoder().encode("2" + "," + `${reward}` + "," +`${soundMode}` + "," +`${tasks[0].time}`+ "," +`${tasks[1].time}` + "," +`${tasks[2].time}`));
+  
+  
+    } else{
+      console.log("connection error");
+    }
+  };
+
+  
+
+  
 
   const handleChangeTask = (index, value) => {
     const newTasks = [...tasks];
@@ -251,100 +235,27 @@ function App() {
     setTasks(newTasks);
   };
   // Function to send tasks sequentially
-  const sendTasks = async () => {
-    console.log("in sendTasks");
-    if (bleServer && bleServer.connected) {
-      try {
-        const service = await bleServer.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
-        const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
-        //await characteristic.writeValue(new TextEncoder().encode(14));
-        
-        for (let i = 0; i < tasks.length; i++) {
-          const taskToSend = ( "2" + "," + tasks[i].task + "," + `${tasks[i].time}` + ",");
-          console.log("Sending task:", taskToSend); // Add this line for logging
-          await characteristic.writeValue(new TextEncoder().encode(taskToSend));
-        }
-        await characteristic.writeValue(new TextEncoder().encode(`${reward}`));
-      } catch (err) {
-        setError(err.message);
-      }
-    }
-  };
 
-  const sendTasks2 = async () => {
-    console.log("in sendTasks");
-    if (bleServer && bleServer.connected) {
-      try {
-        const service = await bleServer.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
-        const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
-        
-       
-        const timeArr = [5];
-        timeArr[0] = 2;
-        timeArr[1] = reward;
-        timeArr[2] = soundMode;
-         for (let i = 0; i < 3; i++){
-            timeArr[i + 3] = tasks[i].time;
-        }
+  const handleCustomReward = async (string) => {
+    if(bleServer){
+      console.log("connected");
+      const service = await bleServer.getPrimaryService('19b10000-e8f2-537e-4f6c-d104768a1214');
+      const BLEmodeCharis = await service.getCharacteristic('19b10021-e8f2-537e-4f6c-d104768a1214');
+      await BLEmodeCharis.writeValue(new TextEncoder().encode(3));
 
-        const timeArrBytes = new Uint8Array(timeArr);
-        await characteristic.writeValue(timeArrBytes);
-        console.log(timeArrBytes);
-        await characteristic.writeValue(new TextEncoder().encode("%"));
-        console.log("%");
-        await characteristic.writeValue(new TextEncoder().encode(tasks[0].task));
-        console.log(tasks[0].task);
-        await characteristic.writeValue(new TextEncoder().encode("," + tasks[1].task));
-        console.log(tasks[1].task);
-        await characteristic.writeValue(new TextEncoder().encode("," + tasks[2].task + "#"));
-        console.log(tasks[2].task);
-        
-        
-        //await characteristic.writeValue(taskBytes);
-        console.log("here");
-        
-        
-        
-        //await characteristic.writeValue(timeArrBytes);
-        //console.log(taskBytes);
-        
-      } catch (err) {
-        setError(err.message);
-      }
-    }
-  };
+      const rewardStrCharis = await service.getCharacteristic('19b10012-e8f2-537e-4f6c-d104768a1214');
+      await rewardStrCharis.writeValue(new TextEncoder().encode("9," + string));
+      console.log("reward string: " + string);
+      
+      
   
-
-  const resetConnection = () => {
-    if (bleServer && bleServer.connected) {
-      bleServer.disconnect();
-      setConnected(false);
-      setBleServer(null);
+    } else{
+      console.log("connection error");
     }
-    connectToDevice();
   };
 
-  const serializeArray = (array) => {
-    const byteArray =  new Uint8Array(array.length * 2);
-    for(let i = 0; i < array.length; i++){
-        const item = array[i];
-        let start = i * 2;
 
-        if(typeof item === 'string'){
-          byteArray[start] = 0;
-          byteArray[start +1] = item.length;
-          for(let j = 0; j < item.length; j++){
-            byteArray[start + j + 2] = item.charCodeAt(j);
-          }
-        } else if(typeof item === 'number'){
-          byteArray[start] = 1;
-          byteArray[start + 1] = item;
-        }
-    }
-
-    return byteArray;
-  }
-
+  
 
   const renderMode = () => {
     switch(mode){
@@ -499,7 +410,7 @@ function App() {
               
               
   
-              <button className="blackButton" onClick={() => sendArray(chimeTimeBytes)} disabled={!connected}>
+              <button className="blackButton" onClick={() => sendChimeTime()} disabled={!connected}>
                 Start Timer
               </button>
               
@@ -513,8 +424,8 @@ function App() {
         return (
           <>
           <div id="desc">
-              <h2>Task Setter</h2>
-              <h3>Set a series of up to 3 tasks for your child to complete in sequence. Each task gets it's own amount of time and starts when the button on the timer is pressed.</h3>
+              <h2>Sequential Timer</h2>
+              <h3>Set up to three timers that start sequentially once the button is pushed.</h3>
             </div>
 
             
@@ -581,8 +492,9 @@ function App() {
             <h3 id="titleColor"><span className="stepNumber">3</span> Timer Settings</h3>
               {tasks.map((task, index) => (
                 <div id="taskSetterWrapper"key={index}>
-                  <p className="taskSetterItem">Task: </p>
-                  <input className="taskSetterItem" type="text" value={task.description} maxLength={17} onChange={(e) => handleChangeTask(index, e.target.value)} />                
+                  {/* <p className="taskSetterItem">Task: </p>
+                  <input className="taskSetterItem" type="text" value={task.description} maxLength={17} onChange={(e) => handleChangeTask(index, e.target.value)} />                 */}
+                  
                   <p className="taskSetterItem">Time:</p>
                   <select className="taskSetterItem"value={task.time} onChange={(e) => handleTaskTimer(e, index)}>
                   <option value="0"></option>
@@ -760,7 +672,7 @@ function App() {
                   Skip reward
                 </label>
               <label id="pushLabel">
-                  <input type="radio" value="1" checked={reward === 1} onChange={() => handleRewardChange(1)} />
+                  <input type="radio" value="2" checked={reward === 2} onChange={() => handleRewardChange(1)} />
                   Reward point at end of task sequence
                 </label>
                 
@@ -780,7 +692,7 @@ function App() {
                   </div>
                 )}
   
-              <button className="blackButton" onClick={() => sendArray(negBytes)} disabled={!connected}>
+              <button className="blackButton" onClick={() => sendNegativeTime()} disabled={!connected}>
                 Start Timer
               </button>
             </div>
@@ -869,7 +781,7 @@ function App() {
          <div className="prog">
           <h3 id="titleColor"><span className="stepNumber">3</span> Timer Settings</h3>
             
-            <div>
+            {/* <div>
             <label id="bankTask">Task: </label>
             <input 
               type="text" 
@@ -877,10 +789,10 @@ function App() {
               maxLength={17} 
               onChange={(e) => handleBankTaskChange(e.target.value)} 
             />
-          </div>
+          </div> */}
 
           <div className="miniFlex">
-            <p>This task should take:</p>
+            <p>This timer should last:</p>
             <select id="timerDuration" value={timer} onChange={handleTimerChange}>
               <option value="0"></option>
               {[...Array(60)].map((_, index) => (
@@ -933,7 +845,7 @@ function App() {
                 )}
             
 
-            <button className="blackButton" onClick={() => sendCommand2(byteArr, bankTask)} disabled={!connected}>
+            <button className="blackButton" onClick={() => sendTimeBanking()} disabled={!connected}>
               Start Timer
             </button>
             
@@ -1069,7 +981,7 @@ function App() {
             className={activeMode === 2 ? 'modeButton active' : 'modeButton'}
             onClick={() => handleModeChange(2)}
           >
-            Task Setter
+            Sequential
           </button>
           <button
             className={activeMode === 3 ? 'modeButton active' : 'modeButton'}
